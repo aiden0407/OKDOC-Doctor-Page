@@ -17,15 +17,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
 
-          <Route path="/*"
-            element={
-              <Layout>
-                <Routes>
-                  <Route path="/calendar" element={<Calendar />} />
-                </Routes>
-              </Layout>
-            }
-          />
+          <Route path="/*" element={
+            <Layout>
+              <Routes>
+                <Route path="/calendar" element={<Calendar />} />
+              </Routes>
+            </Layout>
+          } />
         </Routes>
       </BrowserRouter>
     </Provider>
