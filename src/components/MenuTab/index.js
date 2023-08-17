@@ -55,7 +55,7 @@ function MenuTab() {
         <StyledRow padding="0 10px" opened={menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered}>
           <Text T5 bold={menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered}>원격진료 관리</Text>
           <FlexBox />
-          <Image src={arrowIcon} width={20} className={(menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered) && 'open'} />
+          <Image src={arrowIcon} width={20} />
         </StyledRow>
         <SubMenuWrapper className={(menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered) && 'open'}>
           <SubMenuButton className={menuStatus === "원격진료 진료 현황" && 'selected'} onClick={()=>navigate('/calendar')}>
@@ -71,7 +71,7 @@ function MenuTab() {
         <StyledRow padding="0 10px" marginTop={20} opened={menuStatus==="개인정보" || menuStatus==="비밀번호 변경" || isSecondMenuHovered}>
           <Text T5 bold={menuStatus==="개인정보" || menuStatus==="비밀번호 변경" || isSecondMenuHovered}>설정</Text>
           <FlexBox />
-          <Image src={arrowIcon} width={20} className={(menuStatus==="개인정보" || menuStatus==="비밀번호 변경" || isSecondMenuHovered) && 'open'} />
+          <Image src={arrowIcon} width={20} />
         </StyledRow>
         <SubMenuWrapper className={(menuStatus==="개인정보" || menuStatus==="비밀번호 변경" || isSecondMenuHovered) && 'open'}>
           <SubMenuButton className={menuStatus === "개인정보" && 'selected'} onClick={()=>navigate('/setting/info')}>
