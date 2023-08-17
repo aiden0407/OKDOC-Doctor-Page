@@ -16,7 +16,7 @@ function Calendar() {
 
   return (
     <>
-      <Text T2 bold>원격진료 진료 현황</Text>
+      <Text T2 bold>비밀번호 변경</Text>
       <Row>
       </Row>
     </>
