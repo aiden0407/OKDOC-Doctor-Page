@@ -87,6 +87,9 @@ input {
 input:focus {
 	outline: none;
 }
+input::placeholder {
+	color: #AAADB9;
+}
 input[type="checkbox"] {
 	-webkit-tap-highlight-color: transparent;
 }
@@ -98,4 +101,7 @@ textarea {
 	line-height: 150%;
 	font-family: Pretendard;
 	touch-action: manipulation;
+}
+textarea::placeholder {
+	color: #AAADB9;
 }
