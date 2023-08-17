@@ -25,6 +25,7 @@ function Calendar() {
             </Title>
             <InputWrapper>
               <TextInput
+                readonly
                 type="text"
                 value="logan@insunginfo.co.kr"
               />
