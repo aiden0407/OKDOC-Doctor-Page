@@ -7,6 +7,7 @@ import styled from 'styled-components';
 //Components
 import Header from 'components/Header';
 import MenuTab from 'components/MenuTab';
+import { COLOR } from 'constants/design';
 
 function Layout({ children }) {
 
@@ -21,7 +22,9 @@ function Layout({ children }) {
         <MenuTab />
 
         <BodyContainer isMenuTabOpened={isMenuTabOpened}>
-          {children}
+          <ContentsContainer>
+            {children}
+          </ContentsContainer>
         </BodyContainer>
       </Container>
     </>
@@ -39,5 +42,15 @@ const BodyContainer = styled.div`
   width: ${(props) => props.isMenuTabOpened ? 'calc(100% - 250px)' : '100%'};
   margin-left: ${(props) => props.isMenuTabOpened ? '250px' : '0px'};
   height: calc(100vh - 70px);
-  transition: all 0.3s;
+  transition: margin-left 0.3s;
+  padding: 40px 30px;
+  display: flex;
+  justify-content: center;
 `;
+
+const ContentsContainer = styled.div`
+  width: 100%;
+  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+`
