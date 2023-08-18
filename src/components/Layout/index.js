@@ -14,6 +14,17 @@ function Layout({ children }) {
   const location = useLocation();
   const { state:{ isMenuTabOpened } } = useContext(Context);
 
+  const handleChangeColor = (value) => {
+    switch (value) {
+      case '/calendar/detail':
+      case '/schedule/detail':
+        return COLOR.GRAY7;
+
+      default:
+        return '#FFFFFF';
+    }
+  };
+
   return (
     <>
       <Container>
@@ -21,7 +32,7 @@ function Layout({ children }) {
 
         <MenuTab />
 
-        <BodyContainer isMenuTabOpened={isMenuTabOpened}>
+        <BodyContainer isMenuTabOpened={isMenuTabOpened} background={handleChangeColor(location.pathname)}>
           <ContentsContainer>
             {children}
           </ContentsContainer>
@@ -47,6 +58,7 @@ const BodyContainer = styled.div`
   display: flex;
   overflow-y: scroll;
   justify-content: center;
+  background-color: ${(props) => props.background};
 `;
 
 const ContentsContainer = styled.div`
