@@ -6,11 +6,12 @@ import styled from 'styled-components';
 import { COLOR } from 'constants/design';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
-import { Row, Column, FlexBox, RelativeWrapper } from 'components/Flex';
+import { Row, Column, FlexBox, RelativeWrapper, DividingLine, Box } from 'components/Flex';
 
 //Assets
 import defaultProfileIcon from 'assets/icons/default_profile.png';
 import editIcon from 'assets/icons/edit.svg';
+import phoneSpeakerIcon from 'assets/icons/phone_speaker.svg';
 
 function Calendar() {
 
@@ -36,6 +37,18 @@ function Calendar() {
     }
   };
 
+  function convertToHashtags(text) {
+    const words = text.split(',');
+    const hashtags = words.map(word => `#${word}`);
+    return hashtags.join(' ');
+  }
+
+  function addDotToLines(text) {
+    const lines = text.split('\n');
+    const dottedLines = lines.map(line => `· ${line}`);
+    return dottedLines.join('\n');
+  }
+
   return (
     <InfoContainer>
       <Text T2 bold>개인정보</Text>
@@ -60,7 +73,7 @@ function Calendar() {
                 />
                 <Image src={profileImage ?? defaultProfileIcon} width={100} borderRadius="50%" />
                 {
-                  editable && <Image src={editIcon} width={30} style={{position:'absolute', bottom: 6, right: 1}} />
+                  editable && <Image src={editIcon} width={30} style={{ position: 'absolute', bottom: 6, right: 1 }} />
                 }
               </RelativeWrapper>
 
@@ -73,9 +86,9 @@ function Calendar() {
               </Column>
             </Row>
 
-            <Row marginTop={36} style={{width: '100%', padding: '0 10px'}}>
-              <Text T4 bold style={{width: '25%'}}>성별</Text>
-              <Text T4 style={{width: '25%'}}>남성</Text>
+            <Row marginTop={36} style={{ width: '100%', padding: '0 10px' }}>
+              <Text T4 bold style={{ width: '25%' }}>성별</Text>
+              <Text T4 style={{ width: '25%' }}>남성</Text>
               <Text T4 bold style={{ width: '25%' }}>전화 번호</Text>
               <Text T4 style={{ width: '25%' }}>010-6607-5776</Text>
             </Row>
@@ -116,7 +129,7 @@ function Calendar() {
                   setStrength(event.target.value);
                 }}
               />
-              <Text T7 color="#428EFF" marginTop={10}>*환자가 진료 예약 시 확인하는 정보입니다. 각 증상은 콤마(,)로 구분을 해주시기 바랍니다. 예) 뇌졸중, 당뇨, 치매</Text>
+              <Text T7 color="#428EFF" marginTop={10}>*환자가 진료 예약 시 확인하는 정보입니다. 각 증상은 콤마(,)로 구분을 해주시기 바랍니다. 예) 뇌졸증, 당뇨, 치매</Text>
             </InputWrapper>
           </Section>
 
@@ -176,12 +189,40 @@ function Calendar() {
           </Section>
         </StyledColumn>
 
-        <Text T2 bold>휴대폰영역휴대폰영역휴대폰영역</Text>
+        <PhoneContainer>
+          <PhoneContensWrapper>
+
+            <PhoneDecoration src={phoneSpeakerIcon} width={73}/>
+
+            <Row>
+              <Image src={profileImage ?? defaultProfileIcon} width={66} borderRadius="50%" />
+              <Column marginLeft={24}>
+                <Text T4 bold>김형도 의사</Text>
+                <Text T7 bold color={COLOR.GRAY1}>을지대 병원 (의정부)/{department ? department : '진료과'}</Text>
+                <Text T7 marginTop={12} color={COLOR.GRAY2}>{strength ? convertToHashtags(strength) : '#진료 증상'}</Text>
+              </Column>
+            </Row>
+
+            <StyledDividingLine marginTop={34} color={COLOR.GRAY6} />
+
+            <Text T4 bold color={COLOR.GRAY1} marginTop={34}>학력 및 이력</Text>
+            <Text T6 color={COLOR.GRAY1} marginTop={12} style={{ lineHeight: '28px' }}>{field ? addDotToLines(field) : '· 을지대 병원 (의정부)'}</Text>
+
+            <StyledDividingLine marginTop={24} color={COLOR.GRAY6} />
+
+            <Text T4 bold marginTop={28} style={{ width: '100%', wordWrap: 'break-word' }}>{introductionTitle ? introductionTitle : '자기소개 제목'}</Text>
+            <Text T6 marginTop={18} style={{ width: '100%', wordWrap: 'break-word' }}>{introduction ? introduction : '자기소개 내용'}</Text>
+
+            <PhoneButton>
+              <Text T4 color="#FFFFFF">진료 예약신청</Text>
+            </PhoneButton>
+          </PhoneContensWrapper>
+        </PhoneContainer>
       </InfoWrapper>
 
       <Row marginTop={36} style={{ width: '100%', gap: 30 }}>
         <FlexBox />
-        <EditButton onClick={()=>setEditable(true)}>
+        <EditButton onClick={() => setEditable(true)}>
           <Text T6 medium>수정</Text>
         </EditButton>
         <SaveButton>
@@ -293,4 +334,55 @@ const SaveButton = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+`
+
+const PhoneContainer = styled.div`
+  position: relative;
+  width: 360px;
+  min-width: 360px;
+  height: 740px;
+  padding: 60px 0px 100px 20px;
+  border-radius: 40px;
+  border: 4px solid ${COLOR.GRAY4};
+  overflow: hidden;
+`
+
+const PhoneDecoration = styled(Image)`
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+`
+
+const PhoneContensWrapper = styled(Column)`
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const StyledDividingLine = styled(DividingLine)`
+  width: calc(100% - 20px);
+  min-height: 1px;
+`
+
+const PhoneButton = styled.div`
+  position: absolute;
+  bottom: 20px;
+  width: 310px;
+  height: 56px;
+  border-radius: 5px;
+  background-color: ${COLOR.MAIN};
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `
