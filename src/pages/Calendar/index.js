@@ -35,60 +35,53 @@ function Calendar() {
       let scheduleList = [];
       
       response.data.response.forEach((appointment) => {
-
-        // const date = new Date(schedule.open_at);
-        //   const day = date.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).replace('.', '/').replace('.', '').replace(' ', '');
-        //   const weekday = date.toLocaleDateString('ko-KR', { weekday: 'long' }).slice(-3);
-        //   let time = date.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        //   if (time.startsWith('24:')) {
-        //     time = time.replace('24:', '00:');
-        //   }
           
         scheduleList.push({
           title: `${appointment.patient.passport.user_name} / ${appointment.status==='RESERVATION_CONFIRMED'?'예약':'완료'}`,
           date: appointment.wish_at,
-          //date: '2023-08-02',
-          //date: "2023-08-04T01:30:00.000Z",
           url: `/calendar/detail?id=${appointment.id}`,
-          eventDisplay: 'background'
         });
       });
 
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-21T00:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
       });
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-16T00:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
       });
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-22T00:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
       });
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-28T09:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
       });
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-28T09:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
       });
       scheduleList.push({
         title: '이준범 / 예약',
-        date: "2023-08-04T00:30:00.000Z",
+        date: "2023-08-28T09:30:00.000Z",
         url: `/calendar/detail?id=${1234}`,
-        eventDisplay: 'background'
+      });
+      scheduleList.push({
+        title: '이준범 / 예약',
+        date: "2023-08-28T09:30:00.000Z",
+        url: `/calendar/detail?id=${1234}`,
+      });
+      scheduleList.push({
+        title: '이준범 / 예약',
+        date: "2023-08-28T09:30:00.000Z",
+        url: `/calendar/detail?id=${1234}`,
       });
 
       setEvents(scheduleList);
@@ -99,11 +92,34 @@ function Calendar() {
   }
 
   return (
-    <>
+    <CalendarContainer>
       <Text T2 bold>원격진료 진료 현황</Text>
+
+      <ScheduleInfoBox right={450}>
+        <Text T3 bold>오늘 예약 건</Text>
+        <Row marginTop={15} style={{alignItems: 'flex-start'}}>
+          <Text T1 bold color={COLOR.MAIN} style={{fontSize: 40}}>1</Text>
+          <Text T4 bold color={COLOR.MAIN} marginTop={2} marginLeft={6}>건</Text>
+        </Row>
+      </ScheduleInfoBox>
+
+      <ScheduleInfoBox right={110}>
+        <Text T3 bold>이번 달 남은 예약 건</Text>
+        <Row marginTop={15} style={{alignItems: 'flex-start'}}>
+          <Text T1 bold style={{fontSize: 40}}>11</Text>
+          <Text T4 bold color={COLOR.GRAY2} marginTop={2} marginLeft={6}>/ 20 건</Text>
+        </Row>
+      </ScheduleInfoBox>
+
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
+        contentHeight={650}
+        headerToolbar={{
+          start: 'title',
+          center: '',
+          end: 'prev,next'
+        }}
         events={events}
         eventClick={function(info) {
           info.jsEvent.preventDefault();
@@ -114,24 +130,40 @@ function Calendar() {
         eventTimeFormat={{
           hour: '2-digit',
           minute: '2-digit',
-          meridiem: false
+          hour12: false,
         }}
-        //eventDisplay='block'
         eventColor={COLOR.SUB2}
         eventTextColor='black'
         dayMaxEventRows={4}
-
-
+        locale="kr"
       />
-    </>
+    </CalendarContainer>
   );
 }
 
 export default Calendar;
 
 const CalendarContainer = styled.div`
+  position: relative;
   width: 100%;
-  padding: 48px 0;
+  padding: 0 0 60px 0;
   display: flex;
   flex-direction: column;
+`
+
+const ScheduleInfoBox = styled.div`
+  position: absolute;
+  top: 0;
+  right: ${(props) => `${props.right}px`};
+  width: 320px;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  @media screen and (max-width: 1280px) {
+    transform: scale(0.8);
+    top: 5px;
+    right: ${(props) => `${props.right*4/5-10}px`};
+  }
 `
