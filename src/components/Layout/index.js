@@ -26,10 +26,23 @@ function Layout({ children }) {
     switch (value) {
       case '/calendar/detail':
       case '/schedule/detail':
+      case '/telemedicine':
         return COLOR.GRAY7;
 
       default:
         return '#FFFFFF';
+    }
+  };
+
+  const handleChangeMaxWidth = (value) => {
+    switch (value) {
+      case '/calendar/detail':
+      case '/schedule/detail':
+      case '/telemedicine':
+        return '1800px';
+
+      default:
+        return '1280px';
     }
   };
 
@@ -41,7 +54,7 @@ function Layout({ children }) {
         <MenuTab />
 
         <BodyContainer isMenuTabOpened={isMenuTabOpened} background={handleChangeColor(location.pathname)}>
-          <ContentsContainer>
+          <ContentsContainer maxWidth={handleChangeMaxWidth(location.pathname)}>
             {children}
           </ContentsContainer>
         </BodyContainer>
@@ -72,7 +85,7 @@ const BodyContainer = styled.div`
 const ContentsContainer = styled.div`
   margin-top: 40px;
   width: 100%;
-  max-width: 1280px;
+  max-width: ${(props) => props.maxWidth};
   display: flex;
   flex-direction: column;
 `
