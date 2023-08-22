@@ -22,6 +22,13 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
+    if (sessionStorageData) {
+      navigate('/calendar', { replace: true });
+    }
+  }, [location.pathname]);
+
   const handleSignIn = async function () {
     if (!email.length) {
       alert('이메일을 입력해 주세요.');
@@ -34,13 +41,9 @@ function Login() {
 
     try {
       // const response = await doctorLogin(email, password);
+      //sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data));
 
-      // if (isRememberChecked) {
-      //   localStorage.setItem('loginData', JSON.stringify(response.data));
-      // } else {
-      //   sessionStorage.setItem('loginData', JSON.stringify(response.data));
-      // }
-
+      sessionStorage.setItem('OKDOC_DOCTOR', '1');
       navigate('/calendar');
 
     } catch (error) {
