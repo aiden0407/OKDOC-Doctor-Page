@@ -7,7 +7,7 @@ import styled from 'styled-components';
 //Components
 import Header from 'components/Header';
 import MenuTab from 'components/MenuTab';
-import { COLOR } from 'constants/design';
+import { COLOR } from 'design/constant';
 
 function Layout({ children }) {
 

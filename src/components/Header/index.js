@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 //Components
-import { COLOR } from 'constants/design';
+import { COLOR } from 'design/constant';
 import { Image } from 'components/Image';
 
 //Assets

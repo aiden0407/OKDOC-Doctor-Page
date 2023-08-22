@@ -3,7 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 
 //Components
-import { COLOR } from 'constants/design';
+import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Row, Column, FlexBox, DividingLine } from 'components/Flex';
 

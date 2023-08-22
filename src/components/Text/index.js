@@ -1,6 +1,6 @@
 //Styled Components
 import styled from 'styled-components';
-import { TYPOGRAPHY } from 'constants/design';
+import { TYPOGRAPHY } from 'design/constant';
 
 function fontWeightSelector(bold, medium){
   if(bold) return 'font-weight: 700;';    
