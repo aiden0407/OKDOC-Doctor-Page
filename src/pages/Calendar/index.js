@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 //Components
-import { COLOR } from 'constants/design';
+import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Row } from 'components/Flex';
 
+//FullCalendar
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import 'design/fullcalendar.css';
 
 //Api
 import { getScheduleByDoctorId } from 'api/Schedule';
@@ -24,26 +26,17 @@ function Calendar() {
   const [leftMonthEvents, setLeftMonthEvents] = useState(0);
 
   useEffect(() => {
-    initScheduleData()
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
+    if(sessionStorageData){
+      const storedLoginData = JSON.parse(sessionStorageData);
+      initScheduleData(storedLoginData)
+    }
   }, []);
 
-  function isDateInToday(dateString) {
-    const inputDate = new Date(dateString);
-    const today = new Date();
-    inputDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    return inputDate.getTime() === today.getTime();
-  }
-
-  function isDateInThisMonth(dateString) {
-    const inputDate = new Date(dateString);
-    const today = new Date();
-    return inputDate.getMonth() === today.getMonth() && inputDate.getFullYear() === today.getFullYear();
-  }
-
-  const initScheduleData = async function () {
+  const initScheduleData = async function (loginData) {
     try {
-      const response = await getScheduleByDoctorId();
+      const response = await getScheduleByDoctorId(loginData.id);
+
       let scheduleList = [];
       let todayCount = 0;
       let totalMonthCount = 0;
@@ -51,7 +44,7 @@ function Calendar() {
 
       response.data.response.forEach((appointment) => {
         scheduleList.push({
-          title: `${appointment.patient.passport.user_name} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
+          title: `${appointment.patient.passport.user_name} / ${formatTimeFromISOString(appointment.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
           date: appointment.wish_at,
           url: `/calendar/detail?id=${appointment.id}`,
         });
@@ -74,6 +67,29 @@ function Calendar() {
     } catch (error) {
       alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
     }
+  }
+
+  function formatTimeFromISOString(dateString) {
+    const date = new Date(dateString);
+    console.log(date);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const formattedTime = `${hours}:${minutes}`;
+    return formattedTime;
+  }
+
+  function isDateInToday(dateString) {
+    const inputDate = new Date(dateString);
+    const today = new Date();
+    inputDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return inputDate.getTime() === today.getTime();
+  }
+
+  function isDateInThisMonth(dateString) {
+    const inputDate = new Date(dateString);
+    const today = new Date();
+    return inputDate.getMonth() === today.getMonth() && inputDate.getFullYear() === today.getFullYear();
   }
 
   return (
@@ -117,8 +133,6 @@ function Calendar() {
           minute: '2-digit',
           hour12: false,
         }}
-        eventColor={COLOR.SUB2}
-        eventTextColor='black'
         dayMaxEventRows={4}
         locale="kr"
       />
