@@ -1,0 +1,29 @@
+.fc-event-time,
+.fc-daygrid-body-natural,
+.fc-timegrid-divider {
+	display: none;
+}
+
+th .fc-scrollgrid-sync-inner {
+	background-color: #F5F9FF;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.fc-sticky {
+	padding-left: 4px;
+}
+
+:root {
+	--fc-button-bg-color: #5500CC;
+	--fc-button-border-color: #5500CC;
+	--fc-button-hover-bg-color: #3E0095;
+	--fc-button-hover-border-color: #3E0095;
+
+
+	--fc-event-bg-color: #E3D0FF;
+	--fc-event-border-color: #E3D0FF;
+	--fc-event-text-color: #000000;
+}
