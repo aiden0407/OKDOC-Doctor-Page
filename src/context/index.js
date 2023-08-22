@@ -3,7 +3,7 @@ import { createContext, useReducer } from "react";
 
 //initial state
 const initialState = {
-  isMenuTabOpened: false,
+  isMenuTabOpened: true,
 };
 
 //create context
