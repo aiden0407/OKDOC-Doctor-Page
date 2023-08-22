@@ -1,14 +1,12 @@
 //React
-import { useEffect, useState, useContext } from 'react';
-import { Context } from 'context';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 //Components
 import { COLOR } from 'constants/design';
 import { Text } from 'components/Text';
-import { Image } from 'components/Image';
-import { Row, FlexBox, DividingLine } from 'components/Flex';
+import { Row } from 'components/Flex';
 
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -20,71 +18,58 @@ import { getScheduleByDoctorId } from 'api/Schedule';
 function Calendar() {
 
   const navigate = useNavigate();
-  const [events, setEvents] = useState([
-    { title: 'event 1', date: '2023-08-01', url: '/calendar/detail' },
-    { title: 'event 2', date: '2023-08-02', url: '/calendar/detail' }
-  ]);
+  const [events, setEvents] = useState([]);
+  const [todayEvents, setTodayEvents] = useState(0);
+  const [totalMonthEvents, setTotalMonthEvents] = useState(0);
+  const [leftMonthEvents, setLeftMonthEvents] = useState(0);
 
   useEffect(() => {
     initScheduleData()
   }, []);
 
+  function isDateInToday(dateString) {
+    const inputDate = new Date(dateString);
+    const today = new Date();
+    inputDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return inputDate.getTime() === today.getTime();
+  }
+
+  function isDateInThisMonth(dateString) {
+    const inputDate = new Date(dateString);
+    const today = new Date();
+    return inputDate.getMonth() === today.getMonth() && inputDate.getFullYear() === today.getFullYear();
+  }
+
   const initScheduleData = async function () {
     try {
       const response = await getScheduleByDoctorId();
       let scheduleList = [];
-      
+      let todayCount = 0;
+      let totalMonthCount = 0;
+      let leftMonthCount = 0;
+
       response.data.response.forEach((appointment) => {
-          
         scheduleList.push({
-          title: `${appointment.patient.passport.user_name} / ${appointment.status==='RESERVATION_CONFIRMED'?'예약':'완료'}`,
+          title: `${appointment.patient.passport.user_name} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
           date: appointment.wish_at,
           url: `/calendar/detail?id=${appointment.id}`,
         });
-      });
-
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-21T00:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-16T00:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-22T00:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-28T09:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-28T09:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-28T09:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-28T09:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
-      });
-      scheduleList.push({
-        title: '이준범 / 예약',
-        date: "2023-08-28T09:30:00.000Z",
-        url: `/calendar/detail?id=${1234}`,
+        if(isDateInToday(appointment.wish_at)) {
+          todayCount += 1;
+        }
+        if(isDateInThisMonth(appointment.wish_at)) {
+          totalMonthCount += 1;
+          if(appointment.status === 'RESERVATION_CONFIRMED'){
+            leftMonthCount += 1;
+          }
+        }
       });
 
       setEvents(scheduleList);
+      setTodayEvents(todayCount);
+      setTotalMonthEvents(totalMonthCount);
+      setLeftMonthEvents(leftMonthCount);
 
     } catch (error) {
       alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
@@ -98,7 +83,7 @@ function Calendar() {
       <ScheduleInfoBox right={450}>
         <Text T3 bold>오늘 예약 건</Text>
         <Row marginTop={15} style={{alignItems: 'flex-start'}}>
-          <Text T1 bold color={COLOR.MAIN} style={{fontSize: 40}}>1</Text>
+          <Text T1 bold color={COLOR.MAIN} style={{fontSize: 40}}>{todayEvents}</Text>
           <Text T4 bold color={COLOR.MAIN} marginTop={2} marginLeft={6}>건</Text>
         </Row>
       </ScheduleInfoBox>
@@ -106,8 +91,8 @@ function Calendar() {
       <ScheduleInfoBox right={110}>
         <Text T3 bold>이번 달 남은 예약 건</Text>
         <Row marginTop={15} style={{alignItems: 'flex-start'}}>
-          <Text T1 bold style={{fontSize: 40}}>11</Text>
-          <Text T4 bold color={COLOR.GRAY2} marginTop={2} marginLeft={6}>/ 20 건</Text>
+          <Text T1 bold style={{fontSize: 40}}>{leftMonthEvents}</Text>
+          <Text T4 bold color={COLOR.GRAY2} marginTop={2} marginLeft={6}>/ {totalMonthEvents} 건</Text>
         </Row>
       </ScheduleInfoBox>
 
