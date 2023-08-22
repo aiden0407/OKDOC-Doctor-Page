@@ -45,11 +45,13 @@ function Login() {
 
       const response = {
         data: {
-          id: 'b1fe2079-df9b-411a-93ee-bf21cb0c77bd'
+          response: {
+            id: 'b1fe2079-df9b-411a-93ee-bf21cb0c77bd'
+          }
         }
       }
 
-      sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data));
+      sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data.response));
       navigate('/calendar');
 
     } catch (error) {
