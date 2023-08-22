@@ -1,7 +1,7 @@
 //React
 import { useEffect, useContext } from 'react';
 import { Context } from 'context';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 //Components
@@ -11,8 +11,16 @@ import { COLOR } from 'constants/design';
 
 function Layout({ children }) {
 
+  const navigate = useNavigate();
   const location = useLocation();
   const { state:{ isMenuTabOpened } } = useContext(Context);
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
+    if (!sessionStorageData) {
+      navigate('/', { replace: true });
+    }
+  }, [location.pathname]);
 
   const handleChangeColor = (value) => {
     switch (value) {
