@@ -97,6 +97,8 @@ function Login() {
           <LoginButton onClick={() => handleSignIn()}>
             <Text T6 color="#FFFFFF">Login</Text>
           </LoginButton>
+
+          <Text T6 color={COLOR.GRAY2} marginTop={16} style={{cursor: 'pointer'}} onClick={()=>window.ChannelIO('showMessenger')}>비밀번호를 잊으셨나요?</Text>
         </InnerContainer>
       </LoginContainer>
 
