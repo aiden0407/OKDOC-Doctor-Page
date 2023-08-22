@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 //Components
-import { COLOR } from 'constants/design';
+import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
 
@@ -43,7 +43,13 @@ function Login() {
       // const response = await doctorLogin(email, password);
       //sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data));
 
-      sessionStorage.setItem('OKDOC_DOCTOR', '1');
+      const response = {
+        data: {
+          id: 'b1fe2079-df9b-411a-93ee-bf21cb0c77bd'
+        }
+      }
+
+      sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data));
       navigate('/calendar');
 
     } catch (error) {
