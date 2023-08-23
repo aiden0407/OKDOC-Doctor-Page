@@ -14,7 +14,7 @@ import { Row } from 'components/Flex';
 import { getAppointmentInfoById } from 'api/Telemedicine';
 
 //Assets
-import arrowIcon from 'assets/icons/arrow_solid.svg';
+import arrowIcon from 'assets/icons/arrow.svg';
 
 function Calendar() {
 
@@ -488,6 +488,47 @@ function Calendar() {
 
       <Text T2 bold marginTop={54}>Consulting</Text>
 
+      <ConsultingHeader>
+        <ConsultingSection1>
+
+        </ConsultingSection1>
+        <ConsultingSection2>
+          <Text T5 bold>진료과 / 진료의</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5 bold>일시</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5 bold>상태</Text>
+        </ConsultingSection2>
+        <ConsultingSection3>
+          <Text T5 bold>진단명</Text>
+        </ConsultingSection3>
+        <ConsultingSection3>
+          
+        </ConsultingSection3>
+      </ConsultingHeader>
+
+      <ConsultingLine>
+        <ConsultingSection1>
+          <Image src={arrowIcon} width={24} />
+        </ConsultingSection1>
+        <ConsultingSection2>
+          <Text T5>정형외과 / 이애진님</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5>2023-07-14 13:00</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5>예약(진료 대기)</Text>
+        </ConsultingSection2>
+        <ConsultingSection3>
+          
+        </ConsultingSection3>
+        <ConsultingSection3>
+          
+        </ConsultingSection3>
+      </ConsultingLine>
 
     </div>
   );
@@ -548,3 +589,42 @@ const ContentsParagraph = styled.p`
     background-color: transparent;
   }
 `;
+
+const ConsultingHeader = styled.div`
+  margin-top: 20px;
+  width: 100%;
+  height: 60px;
+  background-color: ${COLOR.SUB3};
+  display: flex;
+`
+
+const ConsultingSection1 = styled.div`
+  width: 24px;
+  margin-left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
+const ConsultingSection2 = styled.div`
+  width: 16%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
+const ConsultingSection3 = styled.div`
+  width: 25%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
+const ConsultingLine = styled.div`
+  width: 100%;
+  height: 50px;
+  display: flex;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid ${COLOR.GRAY5};
+  cursor: pointer;
+`
