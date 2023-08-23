@@ -23,7 +23,7 @@ function Calendar() {
   const searchParams = new URLSearchParams(location.search);
   const appointmentId = searchParams.get('id');
 
-  const [appointmentData, setAppointmentData] = useState([]);
+  const [appointmentData, setAppointmentData] = useState({});
   const [menuStatus, setMenuStatus] = useState('');
 
   useEffect(() => {
@@ -45,7 +45,7 @@ function Calendar() {
     if (appointmentId) {
       initAppointmentData()
     }
-  }, []);
+  }, [location]);
 
   const initAppointmentData = async function () {
     try {
@@ -352,10 +352,18 @@ function Calendar() {
         }
       }
 
-      setAppointmentData(response.data.response)
+      setAppointmentData(response.data.response);
     } catch (error) {
+      setAppointmentData({});
       alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
     }
+  }
+
+  function formatDate(inputDate) {
+    const year = inputDate.substring(0, 4);
+    const month = inputDate.substring(4, 6);
+    const day = inputDate.substring(6, 8);
+    return `${year}.${month}.${day}`;
   }
 
   return (
@@ -369,18 +377,66 @@ function Calendar() {
       <PatientInfoContainer>
         <PatientInfoBox>
           <Text T4 bold>Personal Information</Text>
+          <Row marginTop={30}>
+            <ContentsTitle>
+              <Text T5 bold>이름</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{appointmentData?.patient?.passport?.user_name}</Text>
+            </ContentsText>
+          </Row>
+          <Row marginTop={3}>
+            <ContentsTitle>
+              <Text T5 bold>성별</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{appointmentData?.patient?.gender === 'MALE' ? '남성' : '여성'}</Text>
+            </ContentsText>
+          </Row>
+          <Row marginTop={3}>
+            <ContentsTitle>
+              <Text T5 bold>생년월일</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{formatDate(String(appointmentData?.patient?.passport?.birth))}</Text>
+            </ContentsText>
+          </Row>
         </PatientInfoBox>
 
         <PatientInfoBox>
           <Text T4 bold>Physical Data</Text>
+          <Row marginTop={30}>
+            <ContentsTitle>
+              <Text T5 bold>신장 / 체중</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{appointmentData?.patient?.height} cm / {appointmentData?.patient?.weight} kg</Text>
+            </ContentsText>
+          </Row>
+          <Row marginTop={3}>
+            <ContentsTitle>
+              <Text T5 bold>음주 여부</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{appointmentData?.patient?.drinker === 'FREQUENTLY' ? '자주' : appointmentData?.patient?.drinker === 'SOMETIMES' ? '가끔' : '안함'}</Text>
+            </ContentsText>
+          </Row>
+          <Row marginTop={3}>
+            <ContentsTitle>
+              <Text T5 bold>흡연 여부</Text>
+            </ContentsTitle>
+            <ContentsText>
+              <Text T5 medium>{appointmentData?.patient?.drinker === 'smoker' ? '흡연' : '비흡연'}</Text>
+            </ContentsText>
+          </Row>
         </PatientInfoBox>
 
         <PatientInfoBox>
           <Text T4 bold>Patient Conditions</Text>
           {
             appointmentData?.explain_symptom?.length
-            ?<ContentsText>{appointmentData?.explain_symptom}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.explain_symptom}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
 
@@ -388,8 +444,8 @@ function Calendar() {
           <Text T4 bold>본인 병력</Text>
           {
             appointmentData?.patient?.medical_history?.length
-            ?<ContentsText>{appointmentData?.patient?.medical_history}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.patient?.medical_history}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
 
@@ -397,8 +453,8 @@ function Calendar() {
           <Text T4 bold>가족 병력</Text>
           {
             appointmentData?.patient?.family_medical_history?.length
-            ?<ContentsText>{appointmentData?.patient?.family_medical_history}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.patient?.family_medical_history}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
 
@@ -406,8 +462,8 @@ function Calendar() {
           <Text T4 bold>현재 복용중인 약</Text>
           {
             appointmentData?.patient?.medication?.length
-            ?<ContentsText>{appointmentData?.patient?.medication}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.patient?.medication}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
 
@@ -415,8 +471,8 @@ function Calendar() {
           <Text T4 bold>알러지 반응</Text>
           {
             appointmentData?.patient?.allergic_reaction?.length
-            ?<ContentsText>{appointmentData?.patient?.allergic_reaction}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.patient?.allergic_reaction}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
 
@@ -424,8 +480,8 @@ function Calendar() {
           <Text T4 bold>기타 사항</Text>
           {
             appointmentData?.patient?.consideration?.length
-            ?<ContentsText>{appointmentData?.patient?.consideration}</ContentsText>
-            :<ContentsText color={COLOR.GRAY3}>없음</ContentsText>
+            ?<ContentsParagraph>{appointmentData?.patient?.consideration}</ContentsParagraph>
+            :<ContentsParagraph color={COLOR.GRAY3}>없음</ContentsParagraph>
           }
         </PatientInfoBox>
       </PatientInfoContainer>
@@ -459,7 +515,20 @@ const PatientInfoBox = styled.div`
   flex-direction: column;
 `
 
-const ContentsText = styled.p`
+const ContentsTitle = styled.div`
+  width: 130px;
+  height: 34px;
+  padding: 5px 0;
+`
+
+const ContentsText = styled.div`
+  margin-left: 20px;
+  width: 70%;
+  height: 34px;
+  padding: 5px 0px;
+`
+
+const ContentsParagraph = styled.p`
   margin-top: 30px;
   width: 100%;
   height: 95px;
