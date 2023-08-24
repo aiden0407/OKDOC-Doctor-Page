@@ -8,6 +8,9 @@ import { Text } from 'components/Text';
 import { Image } from 'components/Image';
 import { Row, Column, FlexBox, RelativeWrapper, DividingLine, Box } from 'components/Flex';
 
+//Api
+import { getDepartments } from 'apis/Setting';
+
 //Assets
 import defaultProfileIcon from 'assets/icons/default_profile.png';
 import editIcon from 'assets/icons/edit.svg';
@@ -15,6 +18,8 @@ import phoneSpeakerIcon from 'assets/icons/phone_speaker.svg';
 
 function Calendar() {
 
+  const [profileData, setProfileData] = useState();
+  const [departmentsList, setDepartmentsList] = useState([]);
   const [profileFile, setProfileFile] = useState();
   const [profileImage, setProfileImage] = useState();
   const [department, setDepartment] = useState('');
@@ -24,6 +29,30 @@ function Calendar() {
   const [introduction, setIntroduction] = useState('');
   const [editable, setEditable] = useState(false);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+    if(sessionStorageData){
+      const storedLoginData = JSON.parse(sessionStorageData);
+      setProfileData(storedLoginData);
+      setProfileImage(storedLoginData.photo);
+      setDepartment(storedLoginData.department);
+      setStrength(storedLoginData.strength.join(','));
+      setField(storedLoginData.field.join('\n'));
+      setIntroductionTitle(storedLoginData.self_introduction_title);
+      setIntroduction(storedLoginData.self_introduction);
+      initDepartments();
+    }
+  }, []);
+
+  const initDepartments = async function () {
+    try {
+      const response = await getDepartments();
+      setDepartmentsList(response.data.response);
+    } catch (error) {
+      alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+    }
+  }
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
@@ -79,23 +108,23 @@ function Calendar() {
 
               <Column marginLeft={40}>
                 <Row>
-                  <Text T2 bold>김형도</Text>
-                  <Text T4 bold marginTop={4}>&nbsp;/ 을지대 병원 (의정부)</Text>
+                  <Text T2 bold>{profileData?.name}</Text>
+                  <Text T4 bold marginTop={4}>&nbsp;/ {profileData?.hospital}</Text>
                 </Row>
-                <Text T3>logan@insunginfo.co.kr</Text>
+                <Text T3>{profileData?.email}</Text>
               </Column>
             </Row>
 
             <Row marginTop={36} style={{ width: '100%', padding: '0 10px' }}>
               <Text T4 bold style={{ width: '25%' }}>성별</Text>
-              <Text T4 style={{ width: '25%' }}>남성</Text>
+              <Text T4 style={{ width: '25%' }}>{profileData?.gender === 'MALE' ? '남성' : '여성'}</Text>
               <Text T4 bold style={{ width: '25%' }}>전화 번호</Text>
-              <Text T4 style={{ width: '25%' }}>010-6607-5776</Text>
+              <Text T4 style={{ width: '25%' }}>{profileData?.phone?.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}</Text>
             </Row>
 
             <Row marginTop={24} style={{ width: '100%', padding: '0 10px' }}>
               <Text T4 bold style={{ width: '25%' }}>생년월일</Text>
-              <Text T4 style={{ width: '25%' }}>1999.02.13</Text>
+              <Text T4 style={{ width: '25%' }}>0000.00.00</Text>
               <Text T4 bold style={{ width: '25%' }}>의사 면허 번호</Text>
               <Text T4 style={{ width: '25%' }}>제 00000 호</Text>
             </Row>
@@ -108,9 +137,11 @@ function Calendar() {
             <InputWrapper>
               <DepartmentSelector disabled={!editable} value={department} onChange={(event) => setDepartment(event.target.value)}>
                 <option value="">진료과를 선택하세요.</option>
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
+                {
+                  departmentsList.map((item) =>
+                    <option value={item.name} key={item._id}>{item.name}</option>
+                  )
+                }
               </DepartmentSelector>
             </InputWrapper>
           </Section>
@@ -197,8 +228,8 @@ function Calendar() {
             <Row>
               <Image src={profileImage ?? defaultProfileIcon} width={66} borderRadius="50%" />
               <Column marginLeft={24}>
-                <Text T4 bold>김형도 의사</Text>
-                <Text T7 bold color={COLOR.GRAY1}>을지대 병원 (의정부)/{department ? department : '진료과'}</Text>
+                <Text T4 bold>{profileData?.name}</Text>
+                <Text T7 bold color={COLOR.GRAY1}>{profileData?.hospital}/{department}</Text>
                 <Text T7 marginTop={12} color={COLOR.GRAY2}>{strength ? convertToHashtags(strength) : '#진료 증상'}</Text>
               </Column>
             </Row>
@@ -222,11 +253,19 @@ function Calendar() {
 
       <Row marginTop={36} style={{ width: '100%', gap: 30 }}>
         <FlexBox />
-        <EditButton onClick={() => setEditable(true)}>
-          <Text T6 medium>수정</Text>
+        <EditButton editable={editable} onClick={() => {
+          if(!editable){
+            setEditable(true);
+          }
+        }}>
+          <Text T6 medium color={editable && COLOR.GRAY2}>수정</Text>
         </EditButton>
-        <SaveButton>
-          <Text T6 medium color="#FFFFFF">저장</Text>
+        <SaveButton editable={editable} onClick={() => {
+          if(editable){
+
+          }
+        }}>
+          <Text T6 medium color={editable ? '#FFFFFF' : COLOR.GRAY1}>저장</Text>
         </SaveButton>
       </Row>
     </InfoContainer>
@@ -259,10 +298,6 @@ const ProfileWrapper = styled.div`
   max-width: 780px;
   display: flex;
   flex-direction: column;
-`
-
-const ProfileSection = styled.div`
-  width: 25%;
 `
 
 const Section = styled(Row)`
@@ -312,28 +347,38 @@ const TextArea = styled.textarea`
   border-radius: 5px;
   border: 1px solid ${COLOR.GRAY4};
   font-size: 14px;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `
 
 const EditButton = styled.div`
   width: 80px;
   padding: 15px 20px;
   border-radius: 5px;
-  border: 1px solid #000000;
+  border: 1px solid ${(props) => props.editable ? COLOR.GRAY3 : '#000000'};
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => !props.editable && 'pointer'};
 `
 
 const SaveButton = styled.div`
   width: 80px;
   padding: 15px 20px;
-  background-color: ${COLOR.MAIN};
+  background-color: ${(props) => props.editable ? COLOR.MAIN : COLOR.GRAY5};
   border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => props.editable && 'pointer'};
 `
 
 const PhoneContainer = styled.div`
