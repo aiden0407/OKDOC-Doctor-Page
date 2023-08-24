@@ -8,13 +8,15 @@ import styled from 'styled-components';
 import { COLOR, TYPOGRAPHY } from 'design/constant';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
-import { Row } from 'components/Flex';
+import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
 import { getAppointmentInfoById } from 'api/Telemedicine';
 
 //Assets
+import arrowSolidIcon from 'assets/icons/arrow_solid.svg';
 import arrowIcon from 'assets/icons/arrow.svg';
+import folderIcon from 'assets/icons/folder.svg';
 
 function Calendar() {
 
@@ -25,6 +27,7 @@ function Calendar() {
 
   const [appointmentData, setAppointmentData] = useState({});
   const [menuStatus, setMenuStatus] = useState('');
+  const [detailFocusStatus, setDetailFocusStatus] = useState();
 
   useEffect(() => {
     switch (location.pathname) {
@@ -370,7 +373,7 @@ function Calendar() {
     <div style={{paddingBottom: 100}}>
       <Row>
         <Text T2 bold color={COLOR.GRAY3}>{menuStatus}</Text>
-        <Image src={arrowIcon} width={32} marginLeft={10} />
+        <Image src={arrowSolidIcon} width={32} marginLeft={10} />
         <Text T2 bold color={COLOR.MAIN} marginLeft={10}>진료 상세</Text>
       </Row>
 
@@ -509,7 +512,13 @@ function Calendar() {
         </ConsultingSection3>
       </ConsultingHeader>
 
-      <ConsultingLine>
+      <ConsultingLine onClick={()=>{
+        if(detailFocusStatus===0){
+          setDetailFocusStatus();
+        }else{
+          setDetailFocusStatus(0);
+        }
+      }}>
         <ConsultingSection1>
           <Image src={arrowIcon} width={24} />
         </ConsultingSection1>
@@ -529,6 +538,245 @@ function Calendar() {
           
         </ConsultingSection3>
       </ConsultingLine>
+      <ConsultingDetail className={detailFocusStatus === 0 && 'open'}>
+        <Box height={20} />
+        <Row style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Column style={{ width: '35%' }}>
+            <StyledRow>
+              <Text T5 bold color={COLOR.MAIN}>Patient Conditions</Text>
+              <FlexBox />
+              <Image src={folderIcon} width={25} style={{ cursor: 'pointer' }} />
+            </StyledRow>
+            <ConsultingInput1 
+              readOnly
+            />
+          </Column>
+
+          <Column style={{ width: '60%' }}>
+            <Text T5 bold color={COLOR.MAIN}>Doctor MD note</Text>
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>C.C</Text>
+              </ConsultingTitle>
+              <ConsultingInput2
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>Subjective Symtoms</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+              <ConsultingTitle marginLeft={20}>
+                <Text T6>Assessment</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>Objective Findings</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+              <ConsultingTitle marginLeft={20}>
+                <Text T6>Plan</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <Column style={{ flex: 1 }}>
+                <StyledRow>
+                  <ConsultingTitle>
+                    <Text T6>Diagnosis</Text>
+                  </ConsultingTitle>
+                  <ConsultingInput2
+                    readOnly
+                  />
+                </StyledRow>
+                <StyledRow marginTop={3}>
+                  <Column style={{ width: 90 }}>
+                    <Row gap={4}>
+                      <RadioButton
+                        readOnly
+                        type="radio"
+                        value="임상적 추정"
+                        checked={true}
+                      />
+                      <Text T6>임상적 추정</Text>
+                    </Row>
+                    <Row gap={4}>
+                      <RadioButton
+                        readOnly
+                        type="radio"
+                        value="최종 진단"
+                        checked={false}
+                      />
+                      <Text T6>최종 진단</Text>
+                    </Row>
+                  </Column>
+                  <ConsultingInput2
+                    marginTop={6}
+                    readOnly
+                    value={''}
+                  />
+                </StyledRow>
+              </Column>
+              <Row marginLeft={20} style={{ flex: 1 }}>
+                <ConsultingTitle>
+                  <Text T6>Medical Opinion</Text>
+                </ConsultingTitle>
+                <ConsultingInput3
+                  readOnly
+                />
+              </Row>
+            </StyledRow>
+          </Column>
+        </Row>
+        <Box height={20} />
+      </ConsultingDetail>
+
+      <ConsultingLine onClick={()=>{
+        if(detailFocusStatus===1){
+          setDetailFocusStatus();
+        }else{
+          setDetailFocusStatus(1);
+        }
+      }}>
+        <ConsultingSection1>
+          <Image src={arrowIcon} width={24} />
+        </ConsultingSection1>
+        <ConsultingSection2>
+          <Text T5>정형외과 / 이애진님</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5>2023-07-14 13:00</Text>
+        </ConsultingSection2>
+        <ConsultingSection2>
+          <Text T5>예약(진료 대기)</Text>
+        </ConsultingSection2>
+        <ConsultingSection3>
+          
+        </ConsultingSection3>
+        <ConsultingSection3>
+          
+        </ConsultingSection3>
+      </ConsultingLine>
+      <ConsultingDetail className={detailFocusStatus === 1 && 'open'}>
+        <Box height={20} />
+        <Row style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Column style={{ width: '35%' }}>
+            <StyledRow>
+              <Text T5 bold color={COLOR.MAIN}>Patient Conditions</Text>
+              <FlexBox />
+              <Image src={folderIcon} width={25} style={{ cursor: 'pointer' }} />
+            </StyledRow>
+            <ConsultingInput1 
+              readOnly
+            />
+          </Column>
+
+          <Column style={{ width: '60%' }}>
+            <Text T5 bold color={COLOR.MAIN}>Doctor MD note</Text>
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>C.C</Text>
+              </ConsultingTitle>
+              <ConsultingInput2
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>Subjective Symtoms</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+              <ConsultingTitle marginLeft={20}>
+                <Text T6>Assessment</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <ConsultingTitle>
+                <Text T6>Objective Findings</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+              <ConsultingTitle marginLeft={20}>
+                <Text T6>Plan</Text>
+              </ConsultingTitle>
+              <ConsultingInput3
+                readOnly
+              />
+            </StyledRow>
+
+            <StyledRow marginTop={18}>
+              <Column style={{ flex: 1 }}>
+                <StyledRow>
+                  <ConsultingTitle>
+                    <Text T6>Diagnosis</Text>
+                  </ConsultingTitle>
+                  <ConsultingInput2
+                    readOnly
+                  />
+                </StyledRow>
+                <StyledRow marginTop={3}>
+                  <Column style={{ width: 90 }}>
+                    <Row gap={4}>
+                      <RadioButton
+                        readOnly
+                        type="radio"
+                        value="임상적 추정"
+                        checked={true}
+                      />
+                      <Text T6>임상적 추정</Text>
+                    </Row>
+                    <Row gap={4}>
+                      <RadioButton
+                        readOnly
+                        type="radio"
+                        value="최종 진단"
+                        checked={false}
+                      />
+                      <Text T6>최종 진단</Text>
+                    </Row>
+                  </Column>
+                  <ConsultingInput2
+                    marginTop={6}
+                    readOnly
+                    value={''}
+                  />
+                </StyledRow>
+              </Column>
+              <Row marginLeft={20} style={{ flex: 1 }}>
+                <ConsultingTitle>
+                  <Text T6>Medical Opinion</Text>
+                </ConsultingTitle>
+                <ConsultingInput3
+                  readOnly
+                />
+              </Row>
+            </StyledRow>
+          </Column>
+        </Row>
+        <Box height={20} />
+      </ConsultingDetail>
 
     </div>
   );
@@ -627,4 +875,91 @@ const ConsultingLine = styled.div`
   background-color: #FFFFFF;
   border-bottom: 1px solid ${COLOR.GRAY5};
   cursor: pointer;
+`
+
+const ConsultingDetail = styled.div`
+  max-height: 0px;
+  padding: 0px 60px;
+  background-color: ${COLOR.GRAY6};
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  &.open {
+    max-height: 1000px;
+  }
+`;
+
+const ConsultingInput1 = styled.textarea`
+  margin-top: 18px;
+  width: 100%;
+  height: 290px;
+  padding: 11px 9px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY5};
+  font-size: 12px;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const ConsultingTitle = styled.div`
+  margin-left: ${(props) => `${props.marginLeft}px`};
+  width: 90px;
+`
+
+const ConsultingInput2 = styled.textarea`
+  margin-top: ${(props) => `${props.marginTop}px`};
+  height: 30px;
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY5};
+  font-size: 12px;
+  display: flex;
+  flex: 1;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const ConsultingInput3 = styled.textarea`
+  height: 75px;
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY5};
+  font-size: 12px;
+  display: flex;
+  flex: 1;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const StyledRow = styled(Row)`
+  width: 100%;
+`
+
+const RadioButton = styled.input`
+  margin: 0px;
 `
