@@ -15,7 +15,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import 'design/fullcalendar.css';
 
 //Api
-import { getScheduleByDoctorId } from 'api/Schedule';
+import { getScheduleByDoctorId } from 'apis/Schedule';
 
 function Calendar() {
 

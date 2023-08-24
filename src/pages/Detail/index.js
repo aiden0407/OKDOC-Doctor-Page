@@ -11,7 +11,7 @@ import { Image } from 'components/Image';
 import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
-import { getAppointmentInfoById } from 'api/Telemedicine';
+import { getAppointmentInfoById } from 'apis/Telemedicine';
 
 //Assets
 import arrowSolidIcon from 'assets/icons/arrow_solid.svg';

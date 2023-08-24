@@ -15,6 +15,9 @@ import loginLogoImage from 'assets/images/login_logo.png';
 import mailIcon from 'assets/icons/mail.svg';
 import passwordIcon from 'assets/icons/password.svg';
 
+//Api
+import { likedComment, postComment, uploadImage } from 'apis/Login';
+
 function Login() {
 
   const navigate = useNavigate();
