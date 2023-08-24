@@ -16,8 +16,8 @@ function Layout({ children }) {
   const { state:{ isMenuTabOpened } } = useContext(Context);
 
   useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
-    if (!sessionStorageData) {
+    const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+    if (!sessionToken) {
       navigate('/', { replace: true });
     }
   }, [location.pathname]);

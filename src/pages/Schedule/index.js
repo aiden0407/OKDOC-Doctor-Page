@@ -25,7 +25,7 @@ function Calendar() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
     if(sessionStorageData){
       const storedLoginData = JSON.parse(sessionStorageData);
       initScheduleData(storedLoginData)

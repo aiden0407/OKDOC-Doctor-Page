@@ -26,7 +26,7 @@ function Calendar() {
   const [leftMonthEvents, setLeftMonthEvents] = useState(0);
 
   useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
     if(sessionStorageData){
       const storedLoginData = JSON.parse(sessionStorageData);
       initScheduleData(storedLoginData)
