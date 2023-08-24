@@ -8,6 +8,9 @@ import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
 
+//Api
+import { doctorLogin, getDoctorInfoByCredential } from 'apis/Login';
+
 //Assets
 import loginBackgroundImage from 'assets/images/login_background.png';
 import loginDecoImage from 'assets/images/login_deco.png';
@@ -15,8 +18,6 @@ import loginLogoImage from 'assets/images/login_logo.png';
 import mailIcon from 'assets/icons/mail.svg';
 import passwordIcon from 'assets/icons/password.svg';
 
-//Api
-import { likedComment, postComment, uploadImage } from 'apis/Login';
 
 function Login() {
 
@@ -26,8 +27,8 @@ function Login() {
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR');
-    if (sessionStorageData) {
+    const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+    if (sessionToken) {
       navigate('/calendar', { replace: true });
     }
   }, [location.pathname]);
@@ -44,19 +45,57 @@ function Login() {
 
     try {
       // const response = await doctorLogin(email, password);
-      //sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data));
-
       const response = {
         data: {
           response: {
-            id: 'b1fe2079-df9b-411a-93ee-bf21cb0c77bd'
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikluc3VuZ2luZm9fdXNlcl9jcmVkZW50aWFsIn0.eyJlbWFpbCI6IuuptO2XiOuyiO2YuDEiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNjkyODUxNzcxLCJleHAiOjE2OTY0NTE3NzEsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAiLCJzdWIiOiLrqbTtl4jrsojtmLgxIiwianRpIjoiMTY5Mjg1MTc3MTA1MiJ9.aWNCTKKSxlvDdbvbPZ_T4eQn8fQbO4KA40AXdhY_HC4'
           }
         }
       }
+      sessionStorage.setItem('OKDOC_DOCTOR_TOKEN', response.data.response.accessToken);
+      getDoctorInfo(response.data.response.accessToken)
+    } catch (error) {
+      alert(error);
+    }
+  }
 
-      sessionStorage.setItem('OKDOC_DOCTOR', JSON.stringify(response.data.response));
+  const getDoctorInfo = async function (accessToken) {
+    try {
+      // const response = await getDoctorInfoByCredential(accessToken);
+      const response = {
+        data: {
+          response: {
+            "_id": "64b0ff283f70153e570047e8",
+            "id": "b1fe2079-df9b-411a-93ee-bf21cb0c77bd",
+            "hospital": "을지대 병원 (의정부)",
+            "department": "가정의학과",
+            "name": "허연",
+            "strength": [
+              "가정의학"
+            ],
+            "landline": "01072849850",
+            "phone": "01072849850",
+            "gender": "female",
+            "field": [
+              "고려대학교 대학원 가정의학 박사",
+              "이화여자대학교 의과대학 졸업",
+              "의정부을지대학교병원 가정의학과 교수, 가정의학과 과장",
+              "서울아산병원 가정의학과 전임의",
+              "일산백병원 가정의학과 전임의",
+              "고려대학고 안산병원 가정의학과 전임의"
+            ],
+            "self_introduction_title": "안녕하세요. 허연입니다.",
+            "self_introduction": "바른 진료, 진심을 담은 진료 약속드립니다.",
+            "email": "higjdus@eulji.ac.kr",
+            "photo": "https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/309/59932b0eb046f9fa3e063b8875032edd_crop.jpeg",
+            "created_at": "2023-07-14T07:54:16.189Z",
+            "updated_at": "2023-07-14T07:54:16.189Z",
+            "__v": 0
+          }
+        }
+      }
+      sessionStorage.setItem('OKDOC_DOCTOR_INFO', JSON.stringify(response.data.response));
       navigate('/calendar');
-
     } catch (error) {
       alert(error);
     }
