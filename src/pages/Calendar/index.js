@@ -65,7 +65,9 @@ function Calendar() {
       setLeftMonthEvents(leftMonthCount);
 
     } catch (error) {
-      alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+      if(error.status!==404){
+        alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+      }
     }
   }
 
