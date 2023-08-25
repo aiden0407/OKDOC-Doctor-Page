@@ -9,7 +9,8 @@ import { Image } from 'components/Image';
 import { Row, Column, FlexBox, RelativeWrapper, DividingLine, Box } from 'components/Flex';
 
 //Api
-import { getDepartments } from 'apis/Setting';
+import { getDepartments, editDoctorInfo } from 'apis/Setting';
+import { getDoctorInfoByCredential } from 'apis/Login';
 
 //Assets
 import defaultProfileIcon from 'assets/icons/default_profile.png';
@@ -78,6 +79,44 @@ function Calendar() {
     return dottedLines.join('\n');
   }
 
+  function convertStringToArraySplitComma(inputString) {
+    return inputString.split(',').map(item => item.trim());
+  }
+
+  function convertStringToArraySplitLine(inputString) {
+    return inputString.split('\n').map(item => item.trim());
+  }
+
+  const handleDoctorDataSave = async function () {
+    try {
+      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+      const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+      const storedLoginData = JSON.parse(sessionStorageData);
+      const body = {
+        "department": department,
+        "strength": convertStringToArraySplitComma(strength),
+        "field": convertStringToArraySplitLine(field),
+        "self_introduction_title": introductionTitle,
+        "self_introduction": introduction,
+      }
+      console.log(body)
+      await editDoctorInfo(sessionToken, storedLoginData.id, body);
+      getDoctorInfo(sessionToken);
+    } catch (error) {
+      alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+    }
+  }
+
+  const getDoctorInfo = async function (accessToken) {
+    try {
+      const response = await getDoctorInfoByCredential(accessToken);
+      sessionStorage.setItem('OKDOC_DOCTOR_INFO', JSON.stringify(response.data.response[0]));
+      window.location.reload();
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  }
+
   return (
     <InfoContainer>
       <Text T2 bold>개인정보</Text>
@@ -138,7 +177,7 @@ function Calendar() {
               <DepartmentSelector disabled={!editable} value={department} onChange={(event) => setDepartment(event.target.value)}>
                 <option value="">진료과를 선택하세요.</option>
                 {
-                  departmentsList.map((item) =>
+                  departmentsList?.map((item) =>
                     <option value={item.name} key={item._id}>{item.name}</option>
                   )
                 }
@@ -262,7 +301,7 @@ function Calendar() {
         </EditButton>
         <SaveButton editable={editable} onClick={() => {
           if(editable){
-
+            handleDoctorDataSave();
           }
         }}>
           <Text T6 medium color={editable ? '#FFFFFF' : COLOR.GRAY1}>저장</Text>
