@@ -1,5 +1,5 @@
 //React
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 //Components
@@ -7,11 +7,60 @@ import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Row, Column, FlexBox, DividingLine } from 'components/Flex';
 
+//Api
+import { changePassword } from 'apis/Setting';
+
 function Calendar() {
 
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+    if(sessionStorageData){
+      const storedLoginData = JSON.parse(sessionStorageData);
+      setEmail(storedLoginData.email);
+    }
+  }, []);
+
+  function validatePassword(password) {
+    const regExp = /^.*(?=^.{6,14}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[.?!@#$%^&*+=]).*$/;
+    return regExp.test(password);
+  }
+
+  const handleSave = async function () {
+    if (!password.length) {
+      alert('현재 비밀번호를 입력해 주세요.');
+      return;
+    }
+    if (!newPassword.length) {
+      alert('새 비밀번호를 입력해 주세요.');
+      return;
+    }
+    if (!confirmPassword.length) {
+      alert('새 비밀번호 확인을 입력해 주세요.');
+      return;
+    }
+    if (!validatePassword(newPassword)) {
+      alert('비밀번호는 영문, 숫자, 특수문자 포함 6~14자로 구성되어야 합니다.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert('새 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    try {
+      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+      await changePassword(sessionToken, email, password, newPassword);
+      alert('비밀번호가 변경되었습니다.');
+      window.location.reload();
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  }
 
   return (
     <>
@@ -27,7 +76,7 @@ function Calendar() {
               <TextInput
                 readonly
                 type="text"
-                value="logan@insunginfo.co.kr"
+                value={email}
               />
             </InputWrapper>
           </Section>
@@ -88,7 +137,7 @@ function Calendar() {
 
       <Row marginTop={36} style={{width: '100%'}}>
         <FlexBox />
-        <SaveButton>
+        <SaveButton onClick={() => handleSave()}>
           <Text T6 medium color="#FFFFFF">저장</Text>
         </SaveButton>
       </Row>
