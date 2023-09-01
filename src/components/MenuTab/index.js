@@ -27,12 +27,12 @@ function MenuTab() {
       case '/calendar':
       case '/calendar/detail':
       case '/telemedicine':
-        setMenuStatus('원격진료 진료 현황');
+        setMenuStatus('원격진료 예약 현황');
         break;
 
       case '/schedule':
       case '/schedule/detail':
-        setMenuStatus('진료 스케줄 관리');
+        setMenuStatus('의사 스케줄 관리');
         break;
 
       case '/setting/info':
@@ -52,17 +52,17 @@ function MenuTab() {
     <MenuTabContainer isMenuTabOpened={isMenuTabOpened}>
 
       <Column onMouseEnter={()=>setIsFirstMenuHovered(true)} onMouseLeave={()=>setIsFirstMenuHovered(false)}>
-        <StyledRow padding="0 10px" opened={menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered}>
-          <Text T5 bold={menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered}>원격진료 관리</Text>
+        <StyledRow padding="0 10px" opened={menuStatus==="원격진료 예약 현황" || menuStatus==="의사 스케줄 관리" || isFirstMenuHovered}>
+          <Text T5 bold={menuStatus==="원격진료 예약 현황" || menuStatus==="의사 스케줄 관리" || isFirstMenuHovered}>원격진료 관리</Text>
           <FlexBox />
           <Image src={arrowIcon} width={20} />
         </StyledRow>
-        <SubMenuWrapper className={(menuStatus==="원격진료 진료 현황" || menuStatus==="진료 스케줄 관리" || isFirstMenuHovered) && 'open'}>
-          <SubMenuButton className={menuStatus === "원격진료 진료 현황" && 'selected'} onClick={()=>navigate('/calendar')}>
-            <Text T5 bold={menuStatus === "원격진료 진료 현황"} color={menuStatus === "원격진료 진료 현황" && COLOR.MAIN}>원격진료 진료 현황</Text>
+        <SubMenuWrapper className={(menuStatus==="원격진료 예약 현황" || menuStatus==="의사 스케줄 관리" || isFirstMenuHovered) && 'open'}>
+          <SubMenuButton className={menuStatus === "원격진료 예약 현황" && 'selected'} onClick={()=>navigate('/calendar')}>
+            <Text T5 bold={menuStatus === "원격진료 예약 현황"} color={menuStatus === "원격진료 예약 현황" && COLOR.MAIN}>원격진료 예약 현황</Text>
           </SubMenuButton>
-          <SubMenuButton className={menuStatus === "진료 스케줄 관리" && 'selected'} onClick={()=>navigate('/schedule')}>
-            <Text T5 bold={menuStatus === "진료 스케줄 관리"} color={menuStatus === "진료 스케줄 관리" && COLOR.MAIN}>진료 스케줄 관리</Text>
+          <SubMenuButton className={menuStatus === "의사 스케줄 관리" && 'selected'} onClick={()=>navigate('/schedule')}>
+            <Text T5 bold={menuStatus === "의사 스케줄 관리"} color={menuStatus === "의사 스케줄 관리" && COLOR.MAIN}>의사 스케줄 관리</Text>
           </SubMenuButton>
         </SubMenuWrapper>
       </Column>

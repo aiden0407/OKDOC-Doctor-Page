@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { COLOR } from 'design/constant';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
-import { Row, Column, FlexBox, RelativeWrapper, DividingLine, Box } from 'components/Flex';
+import { Row, Column, FlexBox, RelativeWrapper, DividingLine } from 'components/Flex';
 
 //Api
 import { getDepartments, editDoctorInfo } from 'apis/Setting';

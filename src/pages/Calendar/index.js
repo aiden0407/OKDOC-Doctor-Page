@@ -113,7 +113,7 @@ function Calendar() {
 
   return (
     <CalendarContainer>
-      <Text T2 bold>원격진료 진료 현황</Text>
+      <Text T2 bold>원격진료 예약 현황</Text>
 
       <ScheduleInfoBox right={450}>
         <Text T3 bold>오늘 예약 건</Text>
