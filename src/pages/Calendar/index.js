@@ -15,7 +15,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import 'design/fullcalendar.css';
 
 //Api
-import { getScheduleByDoctorId } from 'apis/Schedule';
+import { getScheduleByDoctorId, getBiddingInformation } from 'apis/Schedule';
 
 function Calendar() {
 
@@ -26,14 +26,15 @@ function Calendar() {
   const [leftMonthEvents, setLeftMonthEvents] = useState(0);
 
   useEffect(() => {
+    const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
     const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
     if(sessionStorageData){
       const storedLoginData = JSON.parse(sessionStorageData);
-      initScheduleData(storedLoginData)
+      initScheduleData(sessionToken, storedLoginData)
     }
   }, []);
 
-  const initScheduleData = async function (loginData) {
+  const initScheduleData = async function (sessionToken, loginData) {
     try {
       const response = await getScheduleByDoctorId(loginData.id);
 
@@ -42,16 +43,24 @@ function Calendar() {
       let totalMonthCount = 0;
       let leftMonthCount = 0;
 
-      response.data.response.forEach((appointment) => {
+      const biddingInfoPromises = response.data.response.map((appointment) => {
+        return findBiddingInformation(sessionToken, appointment.bidding_id);
+      });
+  
+      const biddingInfos = await Promise.all(biddingInfoPromises);
+
+      response.data.response.forEach((appointment, index) => {
+        const biddingInfo = biddingInfos[index];
+
         scheduleList.push({
-          title: `${appointment.patient.passport.user_name} / ${formatTimeFromISOString(appointment.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
-          date: appointment.wish_at,
+          title: `${appointment.patient.passport.user_name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
+          date: biddingInfo.wish_at,
           url: `/calendar/detail?id=${appointment.id}`,
         });
-        if(isDateInToday(appointment.wish_at)) {
+        if(isDateInToday(biddingInfo.wish_at)) {
           todayCount += 1;
         }
-        if(isDateInThisMonth(appointment.wish_at)) {
+        if(isDateInThisMonth(biddingInfo.wish_at)) {
           totalMonthCount += 1;
           if(appointment.status === 'RESERVATION_CONFIRMED'){
             leftMonthCount += 1;
@@ -71,9 +80,17 @@ function Calendar() {
     }
   }
 
+  const findBiddingInformation = async function (loginToken, biddingId) {
+    try {
+      const response = await getBiddingInformation(loginToken, biddingId);
+      return response.data.response;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   function formatTimeFromISOString(dateString) {
     const date = new Date(dateString);
-    console.log(date);
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const formattedTime = `${hours}:${minutes}`;
