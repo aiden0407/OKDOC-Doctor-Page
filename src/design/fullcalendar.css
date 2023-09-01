@@ -16,12 +16,17 @@ th .fc-scrollgrid-sync-inner {
 	padding-left: 4px;
 }
 
+.fc-schedule-event .fc-event-title {
+	margin: 0 !important;
+	font-style: normal !important;
+	z-index: 100;
+}
+
 :root {
 	--fc-button-bg-color: #5500CC;
 	--fc-button-border-color: #5500CC;
 	--fc-button-hover-bg-color: #3E0095;
 	--fc-button-hover-border-color: #3E0095;
-
 
 	--fc-event-bg-color: #E3D0FF;
 	--fc-event-border-color: #E3D0FF;
