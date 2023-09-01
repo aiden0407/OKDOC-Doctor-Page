@@ -31,3 +31,41 @@ export const getBiddingInformation = async function (loginToken, biddingId) {
         throw error.response;
     }
 }
+
+export const openSchedule = async function (loginToken, doctorId, schedule) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule`,
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            },
+            data: schedule
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+export const closeSchedule = async function (loginToken, doctorId, start) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule/scheduleId`,
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            },
+            data: {
+                open_at: start
+            }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
