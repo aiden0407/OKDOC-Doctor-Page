@@ -28,3 +28,17 @@ export const getAppointmentListByPatientId = async function (patientId) {
         throw error.response;
     }
 }
+
+export const getHistoryListByPatientId = async function (patientId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/purchase_histories/?patient_id=${patientId}`,
+            method: 'GET',
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
