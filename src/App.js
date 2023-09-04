@@ -8,6 +8,7 @@ import Layout from 'components/Layout';
 
 //Pages
 import Login from 'pages/Login';
+import FindPassword from 'pages/Login/FindPassword';
 import Calendar from 'pages/Calendar';
 import Schedule from 'pages/Schedule';
 import Detail from 'pages/Detail';
@@ -21,6 +22,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/find-password" element={<FindPassword />} />
 
           <Route path="/*" element={
             <Layout>
