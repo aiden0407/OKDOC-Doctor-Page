@@ -50,16 +50,13 @@ export const openSchedule = async function (loginToken, doctorId, schedule) {
     }
 }
 
-export const closeSchedule = async function (loginToken, doctorId, start) {
+export const deleteAllSchedule = async function (loginToken, doctorId, start) {
     try {
         let options = {
-            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule/scheduleId`,
+            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule`,
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${loginToken}`
-            },
-            data: {
-                open_at: start
             }
         }
         const response = await axios(options);
