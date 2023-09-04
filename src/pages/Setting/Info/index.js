@@ -21,7 +21,7 @@ function Calendar() {
 
   const [profileData, setProfileData] = useState();
   const [departmentsList, setDepartmentsList] = useState([]);
-  const [profileFile, setProfileFile] = useState();
+  const [profileFile, setProfileFile] = useState([]);
   const [profileImage, setProfileImage] = useState();
   const [department, setDepartment] = useState('');
   const [strength, setStrength] = useState('');
@@ -36,7 +36,7 @@ function Calendar() {
     if(sessionStorageData){
       const storedLoginData = JSON.parse(sessionStorageData);
       setProfileData(storedLoginData);
-      setProfileImage(storedLoginData.photo);
+      setProfileImage(storedLoginData?.attachments[0]?.Location ?? storedLoginData.photo);
       setDepartment(storedLoginData.department);
       setStrength(storedLoginData.strength.join(','));
       setField(storedLoginData.field.join('\n'));
@@ -98,11 +98,13 @@ function Calendar() {
         "field": convertStringToArraySplitLine(field),
         "self_introduction_title": introductionTitle,
         "self_introduction": introduction,
+        "images": profileFile
       }
       console.log(body)
       await editDoctorInfo(sessionToken, storedLoginData.id, body);
       getDoctorInfo(sessionToken);
     } catch (error) {
+      console.log(error);
       alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
     }
   }
