@@ -50,7 +50,7 @@ export const openSchedule = async function (loginToken, doctorId, schedule) {
     }
 }
 
-export const deleteAllSchedule = async function (loginToken, doctorId, start) {
+export const deleteAllSchedule = async function (loginToken, doctorId) {
     try {
         let options = {
             url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule`,
