@@ -22,6 +22,10 @@ th .fc-scrollgrid-sync-inner {
 	z-index: 100;
 }
 
+.fc-event-title-container {
+	cursor: pointer;
+}
+
 :root {
 	--fc-button-bg-color: #5500CC;
 	--fc-button-border-color: #5500CC;
