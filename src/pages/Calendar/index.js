@@ -55,7 +55,7 @@ function Calendar() {
         scheduleList.push({
           title: `${appointment.patient.passport.user_name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
           date: biddingInfo.wish_at,
-          url: `/calendar/detail?id=${appointment.id}`,
+          url: `/calendar/detail?id=${appointment.patient.id}`,
         });
         if(isDateInToday(biddingInfo.wish_at)) {
           todayCount += 1;
