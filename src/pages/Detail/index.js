@@ -422,7 +422,7 @@ function Calendar() {
                           </ConsultingTitle>
                           <ConsultingInput2
                             readOnly
-                            value={item?.treatment_data?.disease?.영문명}
+                            value={item?.treatment_data?.disease?.한글명}
                           />
                         </StyledRow>
                         <StyledRow marginTop={3}>
@@ -449,7 +449,7 @@ function Calendar() {
                           <ConsultingInput2
                             marginTop={6}
                             readOnly
-                            value={item?.treatment_data?.disease?.한글명}
+                            value={item?.treatment_data?.disease?.상병기호}
                           />
                         </StyledRow>
                       </Column>
