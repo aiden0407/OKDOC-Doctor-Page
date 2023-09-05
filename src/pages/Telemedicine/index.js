@@ -9,10 +9,10 @@ import { saveAs } from 'file-saver';
 import { COLOR, TYPOGRAPHY } from 'design/constant';
 import { Text } from 'components/Text';
 import { Image } from 'components/Image';
-import { Row, FlexBox, DividingLine } from 'components/Flex';
+import { Row, Column, DividingLine } from 'components/Flex';
 
 //Api
-import { getTreatmentInformation, getTreatmentByPatientId, getTreatmentResults } from 'apis/Telemedicine';
+import { getTreatmentInformation, getTreatmentByPatientId, getTreatmentResults, submitTreatment, findDeases } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -27,6 +27,17 @@ function Telemedicine() {
 
   const [treatmentData, setTreatmentData] = useState();
   const [consultingData, setConsultingData] = useState([]);
+
+  const [CC, setCC] = useState('');
+  const [subjectiveSymtoms, setSubjectiveSymtoms] = useState('');
+  const [objectiveFindings, setObjectiveFindings] = useState('');
+  const [diagnosis, setDiagnosis] = useState('');
+  const [diagnosisType, setDiagnosisType] = useState();
+  const [diagnosisCode, setDiagnosisCode] = useState('');
+  const [diagnosisId, setDiagnosisId] = useState('');
+  const [assessment, setAssessment] = useState('');
+  const [plan, setPlan] = useState('');
+  const [medicalOpinion, setMedicalOpinion] = useState('');
 
   useEffect(() => {
     if (treatmentId) {
@@ -98,7 +109,52 @@ function Telemedicine() {
       });
   };
 
+  const handleTextChange = async (e) => {
+    const searchText = e.target.value;
+    setDiagnosis(searchText); 
+    if(searchText){
+      try {
+        const response = await findDeases(searchText);
+        setDiagnosisCode(response.data.response?.[0]?.상병기호)
+        setDiagnosisId(response.data.response?.[0]?._id);
+      } catch {
+        setDiagnosisCode('');
+        setDiagnosisId();
+      }
+    } else {
+      setDiagnosisCode('');
+      setDiagnosisId();
+    }
+  };
 
+  const handleTreatmentSubmit = async function () {
+    if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType.length || !assessment.length || !plan.length || !medicalOpinion.length) {
+      alert('작성하지 않은 필드가 존재합니다.');
+      return;
+    }
+
+    const result = window.confirm("진단서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
+    if (result) {
+      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+      const data = {
+        "chief_complaint": CC,
+        "subjective_symptom": subjectiveSymtoms,
+        "objective_finding": objectiveFindings,
+        "disease_id": diagnosisId,
+        "diagnosis_type": diagnosisType,
+        "assessment": assessment,
+        "plan": plan,
+        "medical_opinion": medicalOpinion
+      }
+
+      try {
+        await submitTreatment(sessionToken, treatmentData.id, data);
+        navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+      } catch (error) {
+        alert('네트워크 오류로 인해 환자 정보를 불러오지 못했습니다.');
+      }
+    }
+  }
 
   console.log(treatmentData);
   console.log(consultingData);
@@ -244,9 +300,147 @@ function Telemedicine() {
 
       <TelemedicineSector2>
         <MDBox>
+          <Text T4 bold>Doctor MD note</Text>
 
+          <Section marginTop={11}>
+            <Title>
+              <Text T6 bold>C.C</Text>
+            </Title>
+            <InputWrapper>
+              <TextInput
+                placeholder="환자 주요 호소 증상을 입력 해주세요."
+                value={CC}
+                onChange={(event) => {
+                  setCC(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Subjective{'\n'}Symtoms</Text>
+            </Title>
+            <InputWrapper>
+              <TextArea
+                placeholder="주관적 환자 호소 증상을  입력 해주세요."
+                value={subjectiveSymtoms}
+                onChange={(event) => {
+                  setSubjectiveSymtoms(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Objective{'\n'}Findings</Text>
+            </Title>
+            <InputWrapper>
+              <TextArea
+                placeholder="객관적 의사 판단 증상을  입력 해주세요."
+                value={objectiveFindings}
+                onChange={(event) => {
+                  setObjectiveFindings(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Diagnosis</Text>
+              <Column marginTop={6}>
+                <Row gap={4}>
+                  <RadioButton
+                    type="radio"
+                    value="임상적 추정"
+                    checked={diagnosisType === "presumptive"}
+                    onChange={() => {
+                      setDiagnosisType("presumptive");
+                    }}
+                  />
+                  <Text T7>임상적 추정</Text>
+                </Row>
+                <Row gap={4}>
+                  <RadioButton
+                    type="radio"
+                    value="최종 진단"
+                    checked={diagnosisType === "definitive"}
+                    onChange={() => {
+                      setDiagnosisType("definitive");
+                    }}
+                  />
+                  <Text T7>최종 진단</Text>
+                </Row>
+              </Column>
+            </Title>
+            <InputWrapper>
+              <TextInput
+                placeholder="진단을 입력 해주세요. (복수일 경우 ,로 구분)"
+                value={diagnosis}
+                onChange={handleTextChange}
+              />
+              <TextInput
+                readOnly
+                placeholder="질병코드 자동 생성"
+                value={diagnosisCode}
+                style={{marginTop: 4}}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Assessment</Text>
+            </Title>
+            <InputWrapper>
+              <TextArea
+                placeholder="환자 질환에 대한 Assessment를 작성 해주세요."
+                value={assessment}
+                onChange={(event) => {
+                  setAssessment(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Plan</Text>
+            </Title>
+            <InputWrapper>
+              <TextArea
+                placeholder="환자의 질환에 대한 치료 계획을 입력 해주세요."
+                value={plan}
+                onChange={(event) => {
+                  setPlan(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
+          <Section>
+            <Title>
+              <Text T6 bold>Medical{'\n'}Opinion</Text>
+            </Title>
+            <InputWrapper>
+              <TextArea
+                placeholder="진료에 대한 최종 소견을 작성 해주세요."
+                value={medicalOpinion}
+                onChange={(event) => {
+                  setMedicalOpinion(event.target.value);
+                }}
+              />
+            </InputWrapper>
+          </Section>
         </MDBox>
-        asdfasd
+
+        <Row gap={10}>
+          <LineButton onClick={()=>window.ChannelIO('showMessenger')}>
+            <Text T6 medium>고객센터 연결</Text>
+          </LineButton>
+          <LineButton onClick={()=>{}}>
+            <Text T6 medium>소견서 미리보기</Text>
+          </LineButton>
+          <SaveButton onClick={()=>handleTreatmentSubmit()}>
+            <Text T6 medium color='#FFFFFF'>제출</Text>
+          </SaveButton>
+        </Row>
       </TelemedicineSector2>
     </TelemedicineContainer>
   );
@@ -276,6 +470,7 @@ height: 100%;
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-end;
   gap: 14px;
 `
 
@@ -296,7 +491,6 @@ const TelemedicineClock = styled.div`
 `
 
 const Iframe = styled.iframe`
-  margin-top: 24px;
   width: 100%;
   height: 100%;
   border: none;
@@ -363,10 +557,9 @@ const InfoBox10 = styled.div`
 
 const MDBox = styled.div`
   width: 100%;
-  height: 80%;
   display: flex;
   flex-direction: column;
-  padding: 10px 20px;
+  padding: 10px 20px 20px 20px;
   border-radius: 12px;
   background-color: #FFFFFF;
   box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
@@ -383,4 +576,84 @@ const ContentsText = styled.div`
   width: 70%;
   height: 34px;
   padding: 5px 0px;
+`
+
+const Section = styled(Row)`
+  width: 100%;
+  border-bottom: 1px solid ${COLOR.GRAY7};
+  align-items: stretch;
+`;
+
+const Title = styled.div`
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: ${COLOR.GRAY6};
+`
+
+const InputWrapper = styled.div`
+  width: 100%;
+  padding: 10px 0px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`
+
+const TextInput = styled.input`
+  width: 100%;
+  height: 28px;
+  padding: 2px 10px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY4};
+  font-size: 13px;
+`
+
+const TextArea = styled.textarea`
+  width: 100%;
+  height: 55px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY4};
+  font-size: 13px;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const RadioButton = styled.input`
+  margin: 0px;
+  width: 12px;
+`
+
+const LineButton = styled.div`
+  width: 111px;
+  padding: 15px 10px;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  border: 1px solid #000000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor:pointer;
+`
+
+const SaveButton = styled.div`
+  width: 111px;
+  padding: 15px 20px;
+  background: ${COLOR.MAIN};
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 `
