@@ -21,7 +21,7 @@ function Calendar() {
 
   const [profileData, setProfileData] = useState();
   const [departmentsList, setDepartmentsList] = useState([]);
-  const [profileFile, setProfileFile] = useState([]);
+  const [profileFile, setProfileFile] = useState();
   const [profileImage, setProfileImage] = useState();
   const [department, setDepartment] = useState('');
   const [strength, setStrength] = useState('');
@@ -141,7 +141,7 @@ function Calendar() {
                   onChange={handleFileInputChange}
                   style={{ display: 'none' }}
                 />
-                <Image src={profileImage ?? defaultProfileIcon} width={100} borderRadius="50%" />
+                <Image src={profileImage ?? defaultProfileIcon} width={100} height={100} borderRadius="50%" />
                 {
                   editable && <Image src={editIcon} width={30} style={{ position: 'absolute', bottom: 6, right: 1 }} />
                 }
@@ -267,7 +267,7 @@ function Calendar() {
             <PhoneDecoration src={phoneSpeakerIcon} width={73}/>
 
             <Row>
-              <Image src={profileImage ?? defaultProfileIcon} width={66} borderRadius="50%" />
+              <Image src={profileImage ?? defaultProfileIcon} width={66} height={66} borderRadius="50%" />
               <Column marginLeft={24}>
                 <Text T4 bold>{profileData?.name}</Text>
                 <Text T7 bold color={COLOR.GRAY1}>{profileData?.hospital}/{department}</Text>
