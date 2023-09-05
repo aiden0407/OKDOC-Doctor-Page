@@ -119,7 +119,6 @@ function Calendar() {
   }
 
   const handleImageDownload = (file) => {
-    console.log(file)
     fetch(file.Location)
       .then((response) => {
         if (!response.ok) {
@@ -137,12 +136,15 @@ function Calendar() {
   };
 
   const handleCancelTreatmentAppointment = async function (purchaseInformation) {
-    try {
-      await cancelTreatmentAppointment(purchaseInformation.id, purchaseInformation.P_TID);
-      alert('해당 진료가 취소되었습니다.');
-      window.location.reload();
-    } catch (error) {
-      alert(Array.isArray(error?.data?.message) ? error?.data?.message[0] : error?.data?.message);
+    const result = window.confirm("해당 진료를 거절하시겠습니까?");
+    if (result) {
+      try {
+        await cancelTreatmentAppointment(purchaseInformation.id, purchaseInformation.P_TID);
+        alert('해당 진료가 취소되었습니다.');
+        window.location.reload();
+      } catch (error) {
+        alert(Array.isArray(error?.data?.message) ? error?.data?.message[0] : error?.data?.message);
+      }
     }
   }
 
@@ -203,7 +205,7 @@ function Calendar() {
               <Text T5 bold>신장 / 체중</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{patientData?.height} cm / {patientData?.weight} kg</Text>
+              <Text T5 medium>{patientData?.height}cm / {patientData?.weight}kg</Text>
             </ContentsText>
           </Row>
           <Row marginTop={3}>
@@ -243,7 +245,7 @@ function Calendar() {
         </PatientInfoBox>
 
         <PatientInfoBox>
-          <Text T4 bold>현재 복용중인 약</Text>
+          <Text T4 bold>복용 중인 약</Text>
           {
             patientData?.medication?.length
               ? <ContentsParagraph>{patientData?.medication}</ContentsParagraph>
