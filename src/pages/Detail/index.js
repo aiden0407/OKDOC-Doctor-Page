@@ -432,7 +432,7 @@ function Calendar() {
                                 readOnly
                                 type="radio"
                                 value="임상적 추정"
-                                checked={item?.treatment_data?.diagnosis_type !== "definitive"}
+                                checked={item?.treatment_data?.diagnosis_type === "presumptive"}
                               />
                               <Text T6>임상적 추정</Text>
                             </Row>
