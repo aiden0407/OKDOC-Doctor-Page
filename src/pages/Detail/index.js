@@ -98,16 +98,16 @@ function Calendar() {
           const response = await getBiddingInformation(sessionToken, history.fullDocument.treatment_appointment.bidding_id);
           history.bidding_data = response.data.response;
         } catch (error) {
-          console.log(error);
+          //console.log(error);
         }
 
         try {
           const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
-          //const response = await getTreatmentResults(sessionToken, history.fullDocument.treatment_appointment.id);
-          const response = await getTreatmentResults('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikluc3VuZ2luZm9fdXNlcl9jcmVkZW50aWFsIn0.eyJlbWFpbCI6IuuptO2XiOuyiO2YuDEiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNjkyODM4OTg2LCJleHAiOjE2OTY0Mzg5ODYsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAiLCJzdWIiOiLrqbTtl4jrsojtmLgxIiwianRpIjoiMTY5MjgzODk4Njg3NCJ9.5sTzmXyUXRYLzg54jRrhQpowtMDutSSGaK7RuAZBsyA', '89fba794-11db-41c8-84a7-4a0e119d34f4');
+          const response = await getTreatmentResults(sessionToken, history.fullDocument.treatment_appointment.id);
+          //const response = await getTreatmentResults('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikluc3VuZ2luZm9fdXNlcl9jcmVkZW50aWFsIn0.eyJlbWFpbCI6IuuptO2XiOuyiO2YuDEiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNjkyODM4OTg2LCJleHAiOjE2OTY0Mzg5ODYsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAiLCJzdWIiOiLrqbTtl4jrsojtmLgxIiwianRpIjoiMTY5MjgzODk4Njg3NCJ9.5sTzmXyUXRYLzg54jRrhQpowtMDutSSGaK7RuAZBsyA', '89fba794-11db-41c8-84a7-4a0e119d34f4');
           history.treatment_data = response.data.response[0];
         } catch (error) {
-          console.log(error);
+          //console.log(error);
         }
       }
 
@@ -151,6 +151,12 @@ function Calendar() {
     const month = inputDate.substring(4, 6);
     const day = inputDate.substring(6, 8);
     return `${year}.${month}.${day}`;
+  }
+
+  function enteranceTimeDisabled(startTime) {
+    const targetTime = moment(startTime).add(9, 'hours').subtract(5, 'minutes');
+    const currentTime = moment();
+    return currentTime.isBefore(targetTime);
   }
 
   return (
@@ -312,7 +318,7 @@ function Calendar() {
                   <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.patient.passport.user_name}님</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
+                  <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
                   <Text T5>{item.status === "RESERVED" ? item.bidding_data.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
@@ -325,11 +331,13 @@ function Calendar() {
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
                   {(item.status === "RESERVED" && item.bidding_data.status === "RESERVATION_CONFIRMED")
                     && <Row>
-                      <ConsultingButton disabled={true} onClick={(e)=>{
+                      <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e)=>{
                         e.stopPropagation();
-                        navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                        if(!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)){
+                          navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                        }
                       }}>
-                        <Text T6 color="#106DF9">진료실 입장</Text>
+                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)?COLOR.GRAY2:"#106DF9"}>진료실 입장</Text>
                       </ConsultingButton>
                       <ConsultingButton onClick={(e)=>{
                         e.stopPropagation();
@@ -643,11 +651,11 @@ const ConsultingButton = styled.div`
   margin-right: 25px;
   padding: 5px 10px;
   border-radius: 5px;
-  background: #E8F1FF;
+  background: ${(props) => props.disabled ? COLOR.GRAY5 : '#E8F1FF'};
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
 `
 
 const StyledRow = styled(Row)`
