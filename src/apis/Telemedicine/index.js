@@ -62,3 +62,24 @@ export const getTreatmentResults = async function (loginToken, treatmentId) {
         throw error.response;
     }
 }
+
+export const cancelTreatmentAppointment = async function (purchaseId, tid) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/merchant/cancel/${purchaseId}`,
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${process.env.REACT_APP_API_ADMIN_TOKEN}`
+            },
+            data: {
+                tid: tid,
+                msg: "의사의 진료 취소 요청"
+            }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
