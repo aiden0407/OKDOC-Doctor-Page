@@ -27,12 +27,9 @@ export const editDoctorInfo = async function (accessToken, doctorId, data) {
     });
     formData.append('self_introduction_title', data.self_introduction_title);
     formData.append('self_introduction', data.self_introduction);
-    // formData.append('photo', 'https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/309/59932b0eb046f9fa3e063b8875032edd_crop.jpeg');
-    // formData.append('images', {
-    //     uri: data.images,
-    //     type: 'image/jpeg',
-    //     name: `${uuidv4()}.jpg`,
-    // });
+    if(data.images){
+        formData.append('images', data.images);
+    }
 
     try {
         let options = {
