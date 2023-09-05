@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import moment from 'moment';
+import { saveAs } from 'file-saver';
 
 //Components
 import { COLOR, TYPOGRAPHY } from 'design/constant';
@@ -11,7 +12,7 @@ import { Image } from 'components/Image';
 import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
-import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getTreatmentResults } from 'apis/Telemedicine';
+import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getTreatmentResults, cancelTreatmentAppointment } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -117,11 +118,33 @@ function Calendar() {
     }
   }
 
-  function handleImageDownload() {
-  }
+  const handleImageDownload = (file) => {
+    console.log(file)
+    fetch(file.Location)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('파일을 다운로드할 수 없습니다.');
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        // Blob을 파일로 저장
+        saveAs(blob, file.key);
+      })
+      .catch((error) => {
+        console.error('다운로드 오류:', error);
+      });
+  };
 
-  console.log(consultingList);
-  console.log(detailFocusStatus);
+  const handleCancelTreatmentAppointment = async function (purchaseInformation) {
+    try {
+      await cancelTreatmentAppointment(purchaseInformation.id, purchaseInformation.P_TID);
+      alert('해당 진료가 취소되었습니다.');
+      window.location.reload();
+    } catch (error) {
+      alert(Array.isArray(error?.data?.message) ? error?.data?.message[0] : error?.data?.message);
+    }
+  }
 
   function formatDate(inputDate) {
     const year = inputDate.substring(0, 4);
@@ -272,150 +295,169 @@ function Calendar() {
       {
         consultingList?.map((item, index) => {
           return (
-          <div key={`consulting_${index}`}>
-            <ConsultingLine onClick={() => {
-              if (detailFocusStatus === index) {
-                setDetailFocusStatus();
-              } else {
-                setDetailFocusStatus(index);
-              }
-            }}>
-              <ConsultingSection1>
-                {
-                  item.status==="RESERVED" && <Image src={arrowIcon} width={24} />
+            <div key={`consulting_${index}`}>
+              <ConsultingLine onClick={() => {
+                if (detailFocusStatus === index) {
+                  setDetailFocusStatus();
+                } else {
+                  setDetailFocusStatus(index);
                 }
-              </ConsultingSection1>
-              <ConsultingSection2>
-                <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.patient.passport.user_name}님</Text>
-              </ConsultingSection2>
-              <ConsultingSection2>
-                <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
-              </ConsultingSection2>
-              <ConsultingSection2>
-                <Text T5>{item.status==="RESERVED" ? item.bidding_data.status==="RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
-              </ConsultingSection2>
-              <ConsultingSection3>
-
-              </ConsultingSection3>
-              <ConsultingSection3>
-
-              </ConsultingSection3>
-            </ConsultingLine>
-            <ConsultingDetail className={(item.status==="RESERVED" && detailFocusStatus === index) && 'open'}>
-              <Box height={20} />
-              <Row style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Column style={{ width: '35%' }}>
-                  <StyledRow>
-                    <Text T5 bold color={COLOR.MAIN}>Patient Conditions</Text>
-                    <FlexBox />
-                    <Image src={folderIcon} width={25} style={{ cursor: 'pointer' }} onClick={()=>handleImageDownload()} />
-                  </StyledRow>
-                  <ConsultingInput1
-                    readOnly
-                    value={item?.bidding_data?.explain_symptom}
-                  />
-                </Column>
-
-                <Column style={{ width: '60%' }}>
-                  <Text T5 bold color={COLOR.MAIN}>Doctor MD note</Text>
-                  <StyledRow marginTop={18}>
-                    <ConsultingTitle>
-                      <Text T6>C.C</Text>
-                    </ConsultingTitle>
-                    <ConsultingInput2
+              }}>
+                <ConsultingSection1>
+                  {
+                    item.status === "RESERVED" && <Image src={arrowIcon} width={24} />
+                  }
+                </ConsultingSection1>
+                <ConsultingSection2>
+                  <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.patient.passport.user_name}님</Text>
+                </ConsultingSection2>
+                <ConsultingSection2>
+                  <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
+                </ConsultingSection2>
+                <ConsultingSection2>
+                  <Text T5>{item.status === "RESERVED" ? item.bidding_data.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
+                </ConsultingSection2>
+                <ConsultingSection3>
+                  {
+                    item.status === "RESERVED" && item?.bidding_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.disease?.한글명}</Text>
+                  }
+                </ConsultingSection3>
+                <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
+                  {(item.status === "RESERVED" && item.bidding_data.status === "RESERVATION_CONFIRMED")
+                    && <Row>
+                      <ConsultingButton disabled={true} onClick={(e)=>{
+                        e.stopPropagation();
+                        navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                      }}>
+                        <Text T6 color="#106DF9">진료실 입장</Text>
+                      </ConsultingButton>
+                      <ConsultingButton onClick={(e)=>{
+                        e.stopPropagation();
+                        handleCancelTreatmentAppointment(item.fullDocument);
+                      }}>
+                        <Text T6 color="#106DF9">진료 취소 요청</Text>
+                      </ConsultingButton>
+                    </Row>
+                  }
+                </ConsultingSection3>
+              </ConsultingLine>
+              <ConsultingDetail className={(item.status === "RESERVED" && detailFocusStatus === index) && 'open'}>
+                <Box height={20} />
+                <Row style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Column style={{ width: '35%' }}>
+                    <StyledRow>
+                      <Text T5 bold color={COLOR.MAIN}>Patient Conditions</Text>
+                      <FlexBox />
+                      {
+                        item?.bidding_data?.attachments?.[0] && <Image src={folderIcon} width={25} style={{ cursor: 'pointer' }} onClick={() => handleImageDownload(item?.bidding_data?.attachments[0])} />
+                      }
+                    </StyledRow>
+                    <ConsultingInput1
                       readOnly
-                      value={item?.treatment_data?.chief_complaint}
+                      value={item?.bidding_data?.explain_symptom}
                     />
-                  </StyledRow>
+                  </Column>
 
-                  <StyledRow marginTop={18}>
-                    <ConsultingTitle>
-                      <Text T6>Subjective Symtoms</Text>
-                    </ConsultingTitle>
-                    <ConsultingInput3
-                      readOnly
-                      value={item?.treatment_data?.subjective_symptom}
-                    />
-                    <ConsultingTitle marginLeft={20}>
-                      <Text T6>Assessment</Text>
-                    </ConsultingTitle>
-                    <ConsultingInput3
-                      readOnly
-                      value={item?.treatment_data?.assessment}
-                    />
-                  </StyledRow>
-
-                  <StyledRow marginTop={18}>
-                    <ConsultingTitle>
-                      <Text T6>Objective Findings</Text>
-                    </ConsultingTitle>
-                    <ConsultingInput3
-                      readOnly
-                      value={item?.treatment_data?.objective_finding}
-                    />
-                    <ConsultingTitle marginLeft={20}>
-                      <Text T6>Plan</Text>
-                    </ConsultingTitle>
-                    <ConsultingInput3
-                      readOnly
-                      value={item?.treatment_data?.plan}
-                    />
-                  </StyledRow>
-
-                  <StyledRow marginTop={18}>
-                    <Column style={{ flex: 1 }}>
-                      <StyledRow>
-                        <ConsultingTitle>
-                          <Text T6>Diagnosis</Text>
-                        </ConsultingTitle>
-                        <ConsultingInput2
-                          readOnly
-                          value={item?.treatment_data?.disease?.영문명}
-                        />
-                      </StyledRow>
-                      <StyledRow marginTop={3}>
-                        <Column style={{ width: 90 }}>
-                          <Row gap={4}>
-                            <RadioButton
-                              readOnly
-                              type="radio"
-                              value="임상적 추정"
-                              checked={item?.treatment_data?.diagnosis_type!=="definitive"}
-                            />
-                            <Text T6>임상적 추정</Text>
-                          </Row>
-                          <Row gap={4}>
-                            <RadioButton
-                              readOnly
-                              type="radio"
-                              value="최종 진단"
-                              checked={item?.treatment_data?.diagnosis_type==="definitive"}
-                            />
-                            <Text T6>최종 진단</Text>
-                          </Row>
-                        </Column>
-                        <ConsultingInput2
-                          marginTop={6}
-                          readOnly
-                          value={item?.treatment_data?.disease?.한글명}
-                        />
-                      </StyledRow>
-                    </Column>
-                    <Row marginLeft={20} style={{ flex: 1 }}>
+                  <Column style={{ width: '60%' }}>
+                    <Text T5 bold color={COLOR.MAIN}>Doctor MD note</Text>
+                    <StyledRow marginTop={18}>
                       <ConsultingTitle>
-                        <Text T6>Medical Opinion</Text>
+                        <Text T6>C.C</Text>
+                      </ConsultingTitle>
+                      <ConsultingInput2
+                        readOnly
+                        value={item?.treatment_data?.chief_complaint}
+                      />
+                    </StyledRow>
+
+                    <StyledRow marginTop={18}>
+                      <ConsultingTitle>
+                        <Text T6>Subjective Symtoms</Text>
                       </ConsultingTitle>
                       <ConsultingInput3
                         readOnly
-                        value={item?.treatment_data?.medical_opinion}
+                        value={item?.treatment_data?.subjective_symptom}
                       />
-                    </Row>
-                  </StyledRow>
-                </Column>
-              </Row>
-              <Box height={20} />
-            </ConsultingDetail>
-          </div>
+                      <ConsultingTitle marginLeft={20}>
+                        <Text T6>Assessment</Text>
+                      </ConsultingTitle>
+                      <ConsultingInput3
+                        readOnly
+                        value={item?.treatment_data?.assessment}
+                      />
+                    </StyledRow>
+
+                    <StyledRow marginTop={18}>
+                      <ConsultingTitle>
+                        <Text T6>Objective Findings</Text>
+                      </ConsultingTitle>
+                      <ConsultingInput3
+                        readOnly
+                        value={item?.treatment_data?.objective_finding}
+                      />
+                      <ConsultingTitle marginLeft={20}>
+                        <Text T6>Plan</Text>
+                      </ConsultingTitle>
+                      <ConsultingInput3
+                        readOnly
+                        value={item?.treatment_data?.plan}
+                      />
+                    </StyledRow>
+
+                    <StyledRow marginTop={18}>
+                      <Column style={{ flex: 1 }}>
+                        <StyledRow>
+                          <ConsultingTitle>
+                            <Text T6>Diagnosis</Text>
+                          </ConsultingTitle>
+                          <ConsultingInput2
+                            readOnly
+                            value={item?.treatment_data?.disease?.영문명}
+                          />
+                        </StyledRow>
+                        <StyledRow marginTop={3}>
+                          <Column style={{ width: 90 }}>
+                            <Row gap={4}>
+                              <RadioButton
+                                readOnly
+                                type="radio"
+                                value="임상적 추정"
+                                checked={item?.treatment_data?.diagnosis_type !== "definitive"}
+                              />
+                              <Text T6>임상적 추정</Text>
+                            </Row>
+                            <Row gap={4}>
+                              <RadioButton
+                                readOnly
+                                type="radio"
+                                value="최종 진단"
+                                checked={item?.treatment_data?.diagnosis_type === "definitive"}
+                              />
+                              <Text T6>최종 진단</Text>
+                            </Row>
+                          </Column>
+                          <ConsultingInput2
+                            marginTop={6}
+                            readOnly
+                            value={item?.treatment_data?.disease?.한글명}
+                          />
+                        </StyledRow>
+                      </Column>
+                      <Row marginLeft={20} style={{ flex: 1 }}>
+                        <ConsultingTitle>
+                          <Text T6>Medical Opinion</Text>
+                        </ConsultingTitle>
+                        <ConsultingInput3
+                          readOnly
+                          value={item?.treatment_data?.medical_opinion}
+                        />
+                      </Row>
+                    </StyledRow>
+                  </Column>
+                </Row>
+                <Box height={20} />
+              </ConsultingDetail>
+            </div>
           )
         })
       }
@@ -595,6 +637,17 @@ const ConsultingInput3 = styled.textarea`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
+`
+
+const ConsultingButton = styled.div`
+  margin-right: 25px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: #E8F1FF;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 `
 
 const StyledRow = styled(Row)`
