@@ -46,6 +46,40 @@ export const getHistoryStatus = async function (documentKey) {
     }
 }
 
+export const getTreatmentByPatientId = async function (loginToken, patientId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/treatment_appointments/?patient_id=${patientId}`,
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+export const getTreatmentInformation = async function (loginToken, appointmentId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/treatment_appointments/${appointmentId}`,
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            },
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
 export const getTreatmentResults = async function (loginToken, treatmentId) {
     try {
         let options = {
