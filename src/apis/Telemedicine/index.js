@@ -1,5 +1,6 @@
 //API
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 export const getPatientInfoById = async function (loginToken, patientId) {
     try {
@@ -109,6 +110,38 @@ export const cancelTreatmentAppointment = async function (purchaseId, tid) {
                 tid: tid,
                 msg: "의사의 진료 취소 요청"
             }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+export const submitTreatment = async function (loginToken, treatmentId, data) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/treatment_appointments/${treatmentId}/treatments/${uuidv4()}`,
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            },
+            data: data
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+export const findDeases = async function (text) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/diseases?search=${text}`,
+            method: 'GET',
         }
         const response = await axios(options);
         return response;
