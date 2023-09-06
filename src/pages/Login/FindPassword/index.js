@@ -123,7 +123,7 @@ function Login() {
         <InnerContainer>
           <LogoImage src={loginLogoImage} />
 
-          <Text T1 bold marginTop={80}>비밀번호 찾기</Text>
+          <Text T1 bold marginTop={80}>비밀번호 변경</Text>
           <Text T5 color={COLOR.GRAY2} marginTop={16}>가입하신 아이디(이메일)로 비밀번호를 변경하세요.</Text>
           <InputWrapper style={{marginTop: '32px'}}>
             <IconImage src={mailIcon} />
