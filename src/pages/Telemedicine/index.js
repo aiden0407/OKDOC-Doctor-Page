@@ -89,7 +89,7 @@ function Telemedicine() {
               const treatmentResponse = await getTreatmentResults(sessionToken, treatmentHistory[ii].id);
               treatmentHistory[ii].treatmentData = treatmentResponse.data.response[0];
             } catch (error) {
-              alert('네트워크 오류로 인해 이전 진료 정보를 불러오지 못했습니다.');
+              //alert('네트워크 오류로 인해 이전 진료 정보를 불러오지 못했습니다.');
             }
           }
         }
@@ -148,7 +148,7 @@ function Telemedicine() {
   };
 
   const handleTreatmentSubmit = async function () {
-    if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType.length || !assessment.length || !plan.length || !medicalOpinion.length) {
+    if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType || !assessment.length || !plan.length || !medicalOpinion.length) {
       alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
       return;
     }
@@ -418,13 +418,13 @@ function Telemedicine() {
           <Text T6 bold color="#565965">진료 예약 일자</Text>
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY-MM-DD // HH:mm')}</Text>
           <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes').format('HH:mm')}</Text>
+          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(15, 'minutes').format('HH:mm')}</Text>
           {/* <TelemedicineClock>
             <Text T6 color="#565965">{elapsedTime}</Text>
           </TelemedicineClock> */}
         </TelemedicineTitleBox>
 
-        <Iframe src={`https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} allow="camera; microphone" />
+        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} allow="camera; microphone" />
         {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} allow="camera; microphone" /> */}
       </TelemedicineSector1>
 
@@ -508,46 +508,46 @@ function Telemedicine() {
               <Text T5 medium>{treatmentData?.patient?.drinker === 'smoker' ? '흡연' : '비흡연'}</Text>
             </ContentsText>
           </Row>
-          <Row>
+          <StyledRow>
             <ContentsTitle>
               <Text T5 bold>본인 병력</Text>
             </ContentsTitle>
             <ContentsText>
               <Text T5 medium>{treatmentData?.patient?.medical_history?.length ? treatmentData?.patient?.medical_history : '없음'}</Text>
             </ContentsText>
-          </Row>
-          <Row>
+          </StyledRow>
+          <StyledRow>
             <ContentsTitle>
               <Text T5 bold>가족 병력</Text>
             </ContentsTitle>
             <ContentsText>
               <Text T5 medium>{treatmentData?.patient?.family_medical_history?.length ? treatmentData?.patient?.family_medical_history : '없음'}</Text>
             </ContentsText>
-          </Row>
-          <Row>
+          </StyledRow>
+          <StyledRow>
             <ContentsTitle>
               <Text T5 bold>복용 중인 약</Text>
             </ContentsTitle>
             <ContentsText>
               <Text T5 medium>{treatmentData?.patient?.medication?.length ? treatmentData?.patient?.medication : '없음'}</Text>
             </ContentsText>
-          </Row>
-          <Row>
+          </StyledRow>
+          <StyledRow>
             <ContentsTitle>
               <Text T5 bold>알러지 반응</Text>
             </ContentsTitle>
             <ContentsText>
               <Text T5 medium>{treatmentData?.patient?.allergic_reaction?.length ? treatmentData?.patient?.allergic_reaction : '없음'}</Text>
             </ContentsText>
-          </Row>
-          <Row>
+          </StyledRow>
+          <StyledRow>
             <ContentsTitle>
               <Text T5 bold>기타 사항</Text>
             </ContentsTitle>
             <ContentsText>
               <Text T5 medium>{treatmentData?.patient?.consideration?.length ? treatmentData?.patient?.consideration : '없음'}</Text>
             </ContentsText>
-          </Row>
+          </StyledRow>
         </InfoBox61>
       </TelemedicineSector2>
 
@@ -832,7 +832,7 @@ const ContentsTitle = styled.div`
 const ContentsText = styled.div`
   margin-left: 20px;
   width: 70%;
-  height: 34px;
+  height: auto;
   padding: 5px 0px;
 `
 
@@ -914,4 +914,8 @@ const SaveButton = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+`
+
+const StyledRow = styled(Row)`
+  align-items: flex-start;
 `
