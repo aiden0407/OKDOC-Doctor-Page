@@ -317,8 +317,7 @@ function Calendar() {
                   }
                 </ConsultingSection1>
                 <ConsultingSection2>
-                  {/* <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name}님</Text> */}
-                  <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name ==='오케이닥' ? '임수빈' : '곽민영'}님</Text>
+                  <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name}님</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
