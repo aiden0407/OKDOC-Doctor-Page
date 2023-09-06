@@ -34,18 +34,18 @@ function Login() {
   }, [location.pathname]);
 
   const handleSignIn = async function () {
-    // if (!email.length) {
-    //   alert('이메일을 입력해 주세요.');
-    //   return;
-    // }
-    // if (!password.length) {
-    //   alert('비밀번호를 입력해 주세요.');
-    //   return;
-    // }
+    if (!email.length) {
+      alert('이메일을 입력해 주세요.');
+      return;
+    }
+    if (!password.length) {
+      alert('비밀번호를 입력해 주세요.');
+      return;
+    }
 
     try {
-      //const response = await doctorLogin(email, password);
-      const response = await doctorLogin('20201006@eulji.ac.kr', '12345678');
+      const response = await doctorLogin(email, password);
+      //const response = await doctorLogin('20201006@eulji.ac.kr', '12345678');
       sessionStorage.setItem('OKDOC_DOCTOR_TOKEN', response.data.response.accessToken);
       getDoctorInfo(response.data.response.accessToken)
     } catch (error) {
