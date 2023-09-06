@@ -12,7 +12,7 @@ import { Image } from 'components/Image';
 import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
-import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getTreatmentResults, cancelTreatmentAppointment } from 'apis/Telemedicine';
+import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getTreatmentInformation, getTreatmentResults, cancelTreatmentAppointment } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -31,6 +31,8 @@ function Calendar() {
   const [menuStatus, setMenuStatus] = useState('');
   const [consultingList, setConsultingList] = useState([]);
   const [detailFocusStatus, setDetailFocusStatus] = useState();
+
+  console.log(consultingList)
 
   useEffect(() => {
     switch (location.pathname) {
@@ -90,11 +92,19 @@ function Calendar() {
             history.status = 'CANCELED'
           }
         } catch (error) {
-          alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+          //alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+        }
+
+        const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+
+        try {
+          const response = await getTreatmentInformation(sessionToken, history.fullDocument.treatment_appointment.id);
+          history.appointment_data = response.data.response;
+        } catch (error) {
+          //console.log(error);
         }
 
         try {
-          const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
           const response = await getBiddingInformation(sessionToken, history.fullDocument.treatment_appointment.bidding_id);
           history.bidding_data = response.data.response;
         } catch (error) {
@@ -102,9 +112,7 @@ function Calendar() {
         }
 
         try {
-          const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
           const response = await getTreatmentResults(sessionToken, history.fullDocument.treatment_appointment.id);
-          //const response = await getTreatmentResults('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikluc3VuZ2luZm9fdXNlcl9jcmVkZW50aWFsIn0.eyJlbWFpbCI6IuuptO2XiOuyiO2YuDEiLCJyb2xlIjoiZG9jdG9yIiwiaWF0IjoxNjkyODM4OTg2LCJleHAiOjE2OTY0Mzg5ODYsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAiLCJzdWIiOiLrqbTtl4jrsojtmLgxIiwianRpIjoiMTY5MjgzODk4Njg3NCJ9.5sTzmXyUXRYLzg54jRrhQpowtMDutSSGaK7RuAZBsyA', '89fba794-11db-41c8-84a7-4a0e119d34f4');
           history.treatment_data = response.data.response[0];
         } catch (error) {
           //console.log(error);
@@ -323,15 +331,15 @@ function Calendar() {
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{item.status === "RESERVED" ? item.bidding_data.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
+                  <Text T5>{item.status === "RESERVED" ? item.appointment_data.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
-                    item.status === "RESERVED" && item?.bidding_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.disease?.한글명}</Text>
+                    item.status === "RESERVED" && item?.appointment_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.disease?.한글명}</Text>
                   }
                 </ConsultingSection3>
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
-                  {(item.status === "RESERVED" && item.bidding_data.status === "RESERVATION_CONFIRMED")
+                  {(item.status === "RESERVED" && (item.appointment_data.status === "RESERVATION_CONFIRMED" || !item?.treatment_data))
                     && <Row>
                       <ConsultingButton disabled={false} onClick={(e)=>{
                         e.stopPropagation();
@@ -344,14 +352,16 @@ function Calendar() {
                         }
                       }}></ConsultingButton>
                         <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)?COLOR.GRAY2:"#106DF9"}>진료실 입장</Text> */}
-                        <Text T6 color="#106DF9">진료실 입장</Text>
+                        <Text T6 color="#106DF9">{item.appointment_data.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
                       </ConsultingButton>
-                      <ConsultingButton onClick={(e)=>{
-                        e.stopPropagation();
-                        handleCancelTreatmentAppointment(item.fullDocument);
-                      }}>
-                        <Text T6 color="#106DF9">진료 취소 요청</Text>
-                      </ConsultingButton>
+                      {
+                        item.appointment_data.status === "RESERVATION_CONFIRMED" && <ConsultingButton onClick={(e)=>{
+                          e.stopPropagation();
+                          handleCancelTreatmentAppointment(item.fullDocument);
+                        }}>
+                          <Text T6 color="#106DF9">진료 취소 요청</Text>
+                        </ConsultingButton>
+                      }
                     </Row>
                   }
                 </ConsultingSection3>
