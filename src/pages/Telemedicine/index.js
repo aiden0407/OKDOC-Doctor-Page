@@ -43,6 +43,22 @@ function Telemedicine() {
   const [plan, setPlan] = useState('');
   const [medicalOpinion, setMedicalOpinion] = useState('');
 
+  const [startTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+  const calculateElapsedTime = (start, end) => {
+    const elapsedSeconds = Math.floor((end - start) / 1000);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+  const elapsedTime = calculateElapsedTime(startTime, currentTime);
+
   useEffect(() => {
     if (treatmentId) {
       initData();
@@ -406,7 +422,7 @@ function Telemedicine() {
           <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes').format('HH:mm')}</Text>
           <TelemedicineClock>
-            <Text T6 color="#565965">00:00</Text>
+            <Text T6 color="#565965">{elapsedTime}</Text>
           </TelemedicineClock>
         </TelemedicineTitleBox>
 
@@ -727,6 +743,7 @@ const TelemedicineTitleBox = styled.div`
 `
 
 const TelemedicineClock = styled.div`
+  min-width: 76px;
   padding: 8px 18px;
   border-radius: 5px;
   border: 1px solid #000000;
