@@ -164,10 +164,10 @@ function Calendar() {
             </Row>
 
             <Row marginTop={24} style={{ width: '100%', padding: '0 10px' }}>
-              <Text T4 bold style={{ width: '25%' }}>생년월일</Text>
-              <Text T4 style={{ width: '25%' }}>0000.00.00</Text>
+              {/* <Text T4 bold style={{ width: '25%' }}>생년월일</Text>
+              <Text T4 style={{ width: '25%' }}>0000.00.00</Text> */}
               <Text T4 bold style={{ width: '25%' }}>의사 면허 번호</Text>
-              <Text T4 style={{ width: '25%' }}>제 00000 호</Text>
+              <Text T4 style={{ width: '25%' }}>제 {profileData?.id} 호</Text>
             </Row>
           </ProfileWrapper>
 
