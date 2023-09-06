@@ -43,21 +43,21 @@ function Telemedicine() {
   const [plan, setPlan] = useState('');
   const [medicalOpinion, setMedicalOpinion] = useState('');
 
-  const [startTime] = useState(new Date());
-  const [currentTime, setCurrentTime] = useState(new Date());
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-  const calculateElapsedTime = (start, end) => {
-    const elapsedSeconds = Math.floor((end - start) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-  const elapsedTime = calculateElapsedTime(startTime, currentTime);
+  // const [startTime] = useState(new Date());
+  // const [currentTime, setCurrentTime] = useState(new Date());
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setCurrentTime(new Date());
+  //   }, 1000);
+  //   return () => clearInterval(intervalId);
+  // }, []);
+  // const calculateElapsedTime = (start, end) => {
+  //   const elapsedSeconds = Math.floor((end - start) / 1000);
+  //   const minutes = Math.floor(elapsedSeconds / 60);
+  //   const seconds = elapsedSeconds % 60;
+  //   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  // };
+  // const elapsedTime = calculateElapsedTime(startTime, currentTime);
 
   useEffect(() => {
     if (treatmentId) {
@@ -418,12 +418,12 @@ function Telemedicine() {
       <TelemedicineSector1>
         <TelemedicineTitleBox>
           <Text T6 bold color="#565965">진료 예약 일자</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY-MM-DD, HH:mm')}</Text>
+          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY-MM-DD // HH:mm')}</Text>
           <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes').format('HH:mm')}</Text>
-          <TelemedicineClock>
+          {/* <TelemedicineClock>
             <Text T6 color="#565965">{elapsedTime}</Text>
-          </TelemedicineClock>
+          </TelemedicineClock> */}
         </TelemedicineTitleBox>
 
         <Iframe src={`https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} allow="camera; microphone" />
@@ -689,7 +689,7 @@ function Telemedicine() {
           <LineButton onClick={()=>window.ChannelIO('showMessenger')}>
             <Text T6 medium>고객센터 연결</Text>
           </LineButton>
-          <LineButton onClick={()=>window.open('https://forms.gle/RNpf1d3tvndL2Tfd7', '_blank')}>
+          <LineButton onClick={()=>window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('DD')}`, '_blank')}>
             <Text T6 medium>진료영상 첨부</Text>
           </LineButton>
           <LineButton onClick={()=>setIsDiagnosisOpend(!isDiagnosisOpend)}>
@@ -735,7 +735,7 @@ height: 100%;
 
 const TelemedicineTitleBox = styled.div`
   width: 100%;
-  padding: 10px;
+  padding: 10px 30px;
   display: flex;
   background: ${COLOR.SUB3};
   justify-content: space-between;
