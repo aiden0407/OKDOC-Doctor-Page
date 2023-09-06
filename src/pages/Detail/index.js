@@ -341,18 +341,13 @@ function Calendar() {
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
                   {(item.status === "RESERVED" && (item.appointment_data.status === "RESERVATION_CONFIRMED" || !item?.treatment_data))
                     && <Row>
-                      <ConsultingButton disabled={false} onClick={(e)=>{
+                      <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
-                      }}>
-                        {/* <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e)=>{
-                        e.stopPropagation();
-                        if(!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)){
+                        if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
                           navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
                         }
-                      }}></ConsultingButton>
-                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)?COLOR.GRAY2:"#106DF9"}>진료실 입장</Text> */}
-                        <Text T6 color="#106DF9">{item.appointment_data.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
+                      }}>
+                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{item.appointment_data.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
                       </ConsultingButton>
                       {
                         item.appointment_data.status === "RESERVATION_CONFIRMED" && <ConsultingButton onClick={(e)=>{
