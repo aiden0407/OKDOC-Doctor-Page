@@ -34,17 +34,18 @@ function Login() {
   }, [location.pathname]);
 
   const handleSignIn = async function () {
-    if (!email.length) {
-      alert('이메일을 입력해 주세요.');
-      return;
-    }
-    if (!password.length) {
-      alert('비밀번호를 입력해 주세요.');
-      return;
-    }
+    // if (!email.length) {
+    //   alert('이메일을 입력해 주세요.');
+    //   return;
+    // }
+    // if (!password.length) {
+    //   alert('비밀번호를 입력해 주세요.');
+    //   return;
+    // }
 
     try {
-      const response = await doctorLogin(email, password);
+      //const response = await doctorLogin(email, password);
+      const response = await doctorLogin('20201006@eulji.ac.kr', '12345678');
       sessionStorage.setItem('OKDOC_DOCTOR_TOKEN', response.data.response.accessToken);
       getDoctorInfo(response.data.response.accessToken)
     } catch (error) {
@@ -108,7 +109,8 @@ function Login() {
             <Text T6 color="#FFFFFF">Login</Text>
           </LoginButton>
 
-          <Text T6 color={COLOR.GRAY2} marginTop={16} style={{cursor: 'pointer'}} onClick={()=>window.ChannelIO('showMessenger')}>비밀번호를 잊으셨나요?</Text>
+          {/* <Text T6 color={COLOR.GRAY2} marginTop={16} style={{cursor: 'pointer'}} onClick={()=>window.ChannelIO('showMessenger')}>비밀번호를 잊으셨나요?</Text> */}
+          <Text T6 color={COLOR.GRAY2} marginTop={16} style={{cursor: 'pointer'}} onClick={()=>navigate('/find-password')}>비밀번호를 잊으셨나요?</Text>
         </InnerContainer>
       </LoginContainer>
 

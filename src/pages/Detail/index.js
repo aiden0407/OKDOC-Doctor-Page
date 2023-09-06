@@ -317,7 +317,8 @@ function Calendar() {
                   }
                 </ConsultingSection1>
                 <ConsultingSection2>
-                  <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.patient.passport.user_name}님</Text>
+                  {/* <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name}님</Text> */}
+                  <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name ==='오케이닥' ? '임수빈' : '곽민영'}님</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
@@ -333,13 +334,18 @@ function Calendar() {
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
                   {(item.status === "RESERVED" && item.bidding_data.status === "RESERVATION_CONFIRMED")
                     && <Row>
-                      <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e)=>{
+                      <ConsultingButton disabled={false} onClick={(e)=>{
+                        e.stopPropagation();
+                        navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                      }}>
+                        {/* <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e)=>{
                         e.stopPropagation();
                         if(!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)){
                           navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
                         }
-                      }}>
-                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)?COLOR.GRAY2:"#106DF9"}>진료실 입장</Text>
+                      }}></ConsultingButton>
+                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)?COLOR.GRAY2:"#106DF9"}>진료실 입장</Text> */}
+                        <Text T6 color="#106DF9">진료실 입장</Text>
                       </ConsultingButton>
                       <ConsultingButton onClick={(e)=>{
                         e.stopPropagation();
