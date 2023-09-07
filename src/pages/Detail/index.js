@@ -331,7 +331,7 @@ function Calendar() {
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{item.status === "RESERVED" ? item.appointment_data.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
+                  <Text T5>{item.status === "RESERVED" ? item.appointment_data?.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
@@ -339,7 +339,7 @@ function Calendar() {
                   }
                 </ConsultingSection3>
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
-                  {(item.status === "RESERVED" && (item.appointment_data.status === "RESERVATION_CONFIRMED" || !item?.treatment_data))
+                  {(item.status === "RESERVED" && (item.appointment_data?.status === "RESERVATION_CONFIRMED" || !item?.treatment_data))
                     && <Row>
                       <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
                         e.stopPropagation();
@@ -347,10 +347,10 @@ function Calendar() {
                           navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
                         }
                       }}>
-                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{item.appointment_data.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
+                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{item.appointment_data?.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
                       </ConsultingButton>
                       {
-                        item.appointment_data.status === "RESERVATION_CONFIRMED" && <ConsultingButton onClick={(e)=>{
+                        item.appointment_data?.status === "RESERVATION_CONFIRMED" && <ConsultingButton onClick={(e)=>{
                           e.stopPropagation();
                           handleCancelTreatmentAppointment(item.fullDocument);
                         }}>
