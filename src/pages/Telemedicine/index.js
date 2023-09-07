@@ -424,7 +424,7 @@ function Telemedicine() {
           </TelemedicineClock> */}
         </TelemedicineTitleBox>
 
-        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} allow="camera; microphone" />
+        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
         {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} allow="camera; microphone" /> */}
       </TelemedicineSector1>
 
