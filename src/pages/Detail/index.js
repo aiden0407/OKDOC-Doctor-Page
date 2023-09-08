@@ -343,9 +343,9 @@ function Calendar() {
                     && <Row>
                       <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
                         e.stopPropagation();
-                        if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
+                        //if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
                           navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
-                        }
+                        //}
                       }}>
                         <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{item.appointment_data?.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
                       </ConsultingButton>
