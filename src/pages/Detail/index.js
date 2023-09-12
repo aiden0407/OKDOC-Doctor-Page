@@ -164,7 +164,7 @@ function Calendar() {
   }
 
   function enteranceTimeDisabled(startTime) {
-    const targetTime = moment(startTime).add(9, 'hours').subtract(5, 'minutes');
+    const targetTime = moment(startTime).add(9, 'hours').subtract(4, 'minutes');
     const currentTime = moment();
     return currentTime.isBefore(targetTime);
   }
