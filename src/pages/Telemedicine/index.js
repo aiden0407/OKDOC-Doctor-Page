@@ -42,25 +42,10 @@ function Telemedicine() {
   const [diagnosisCode, setDiagnosisCode] = useState('');
   const [diagnosisId, setDiagnosisId] = useState('');
   const [diagnosisList, setDiagnosisList] = useState([]);
+  const [isDiagnosisListOpen, setIsDiagnosisListOpen] = useState(false);
   const [assessment, setAssessment] = useState('');
   const [plan, setPlan] = useState('');
   const [medicalOpinion, setMedicalOpinion] = useState('');
-
-  // const [startTime] = useState(new Date());
-  // const [currentTime, setCurrentTime] = useState(new Date());
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     setCurrentTime(new Date());
-  //   }, 1000);
-  //   return () => clearInterval(intervalId);
-  // }, []);
-  // const calculateElapsedTime = (start, end) => {
-  //   const elapsedSeconds = Math.floor((end - start) / 1000);
-  //   const minutes = Math.floor(elapsedSeconds / 60);
-  //   const seconds = elapsedSeconds % 60;
-  //   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  // };
-  // const elapsedTime = calculateElapsedTime(startTime, currentTime);
 
   useEffect(() => {
     startCapture();
@@ -182,17 +167,19 @@ function Telemedicine() {
 
   const handleTextChange = async (e) => {
     const searchText = e.target.value;
-    setDiagnosis(searchText); 
+    setDiagnosis(searchText);
     if(searchText){
       try {
         const response = await findDeases(searchText);
-        console.log(response.data.response)
         setDiagnosisList(response.data.response);
+        setIsDiagnosisListOpen(true);
       } catch {
         setDiagnosisList([]);
+        setIsDiagnosisListOpen(false);
       }
     } else {
       setDiagnosisList([]);
+      setIsDiagnosisListOpen(false);
     }
   };
 
@@ -674,23 +661,33 @@ function Telemedicine() {
                 </Row>
               </Column>
             </Title>
-            <InputWrapper>
+            <InputWrapper style={{position: !isDiagnosisOpend && 'relative'}}>
               <TextInput
                 placeholder="진단을 입력 해주세요. (복수일 경우 ,로 구분)"
                 value={diagnosis}
                 onChange={handleTextChange}
               />
-              <Column>
-              {/* {
-                diagnosisList?.map((item, index) => {
-                  return (
-                    <>
 
-                    </>
-                  )
-                })
-              } */}
-              </Column>
+              {
+                (!isDiagnosisOpend && isDiagnosisListOpen)
+                && <SearchBoxColumn>
+                  {
+                    diagnosisList?.map((item) => {
+                      return (
+                        <SearchBox key={item._id} onClick={() => {
+                          setIsDiagnosisListOpen(false);
+                          setDiagnosis(item.한글명);
+                          setDiagnosisCode(item.상병기호);
+                          setDiagnosisId(item._id);
+                        }}>
+                          <Text T6>{item.한글명} / {item.영문명}</Text>
+                        </SearchBox>
+                      )
+                    })
+                  }
+                </SearchBoxColumn>
+              }
+              
               <TextInput
                 readOnly
                 placeholder="질병코드 자동 생성"
@@ -981,4 +978,33 @@ const SaveButton = styled.div`
 
 const StyledRow = styled(Row)`
   align-items: flex-start;
+`
+
+const SearchBoxColumn = styled(Column)`
+  position: absolute;
+  top: 38px;
+  left: 10px;
+  height: 100px;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 5px;
+  }
+`
+
+const SearchBox = styled.div`
+  padding: 0 10px;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  &:hover {
+    background-color: ${COLOR.SUB3};
+  }
 `
