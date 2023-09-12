@@ -28,6 +28,8 @@ function Telemedicine() {
   const searchParams = new URLSearchParams(location.search);
   const treatmentId = searchParams.get('id');
 
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+
   const [treatmentData, setTreatmentData] = useState();
   const [consultingData, setConsultingData] = useState([]);
   const [isDiagnosisOpend, setIsDiagnosisOpend] = useState(false);
@@ -39,6 +41,7 @@ function Telemedicine() {
   const [diagnosisType, setDiagnosisType] = useState();
   const [diagnosisCode, setDiagnosisCode] = useState('');
   const [diagnosisId, setDiagnosisId] = useState('');
+  const [diagnosisList, setDiagnosisList] = useState([]);
   const [assessment, setAssessment] = useState('');
   const [plan, setPlan] = useState('');
   const [medicalOpinion, setMedicalOpinion] = useState('');
@@ -58,6 +61,10 @@ function Telemedicine() {
   //   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   // };
   // const elapsedTime = calculateElapsedTime(startTime, currentTime);
+
+  useEffect(() => {
+    startCapture();
+  }, []);
 
   useEffect(() => {
     if (treatmentId) {
@@ -104,6 +111,50 @@ function Telemedicine() {
     }
   }
 
+  let isRecording = false;
+
+  async function startCapture() {
+    if (isRecording) {
+      return;
+    }
+    isRecording = true;
+
+    let chunks = [];
+    try {
+      const videoStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" }, audio: true });
+      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const tracks = [...videoStream.getTracks(), ...audioStream.getAudioTracks()];
+      const combinedStream = new MediaStream(tracks);
+      const recorder = new MediaRecorder(combinedStream);
+
+      recorder.ondataavailable = (event) => {
+        chunks.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { 'type': 'video/mp4' });
+        chunks = [];
+        const videoURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = videoURL;
+        link.download = 'recorded-video.mp4';
+        link.click();
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+
+    } catch (err) {
+      console.error("Error: " + err);
+    }
+  }
+
+  function stopCapture() {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+    }
+  }
+
   function formatDate(inputDate) {
     const year = inputDate.substring(0, 4);
     const month = inputDate.substring(4, 6);
@@ -135,15 +186,13 @@ function Telemedicine() {
     if(searchText){
       try {
         const response = await findDeases(searchText);
-        setDiagnosisCode(response.data.response?.[0]?.상병기호)
-        setDiagnosisId(response.data.response?.[0]?._id);
+        console.log(response.data.response)
+        setDiagnosisList(response.data.response);
       } catch {
-        setDiagnosisCode('');
-        setDiagnosisId();
+        setDiagnosisList([]);
       }
     } else {
-      setDiagnosisCode('');
-      setDiagnosisId();
+      setDiagnosisList([]);
     }
   };
 
@@ -425,7 +474,7 @@ function Telemedicine() {
         </TelemedicineTitleBox>
 
         <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
-        {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} allow="camera; microphone" /> */}
+        {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=2024-07-10T02:00:00.000Z`} allow="camera; microphone" /> */}
       </TelemedicineSector1>
 
       <TelemedicineSector2>
@@ -631,6 +680,17 @@ function Telemedicine() {
                 value={diagnosis}
                 onChange={handleTextChange}
               />
+              <Column>
+              {/* {
+                diagnosisList?.map((item, index) => {
+                  return (
+                    <>
+
+                    </>
+                  )
+                })
+              } */}
+              </Column>
               <TextInput
                 readOnly
                 placeholder="질병코드 자동 생성"
@@ -687,7 +747,10 @@ function Telemedicine() {
           <LineButton onClick={()=>window.ChannelIO('showMessenger')}>
             <Text T6 medium>고객센터 연결</Text>
           </LineButton>
-          <LineButton onClick={()=>window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('DD')}`, '_blank')}>
+          <LineButton onClick={()=>{
+            stopCapture();
+            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('DD')}`, '_blank')
+          }}>
             <Text T6 medium>진료영상 첨부</Text>
           </LineButton>
           <LineButton onClick={()=>setIsDiagnosisOpend(!isDiagnosisOpend)}>
