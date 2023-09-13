@@ -27,12 +27,14 @@ function Calendar() {
   const searchParams = new URLSearchParams(location.search);
   const patientId = searchParams.get('id');
 
+  const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+  const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+  const storedLoginData = JSON.parse(sessionStorageData);
+
   const [patientData, setPatientData] = useState({});
   const [menuStatus, setMenuStatus] = useState('');
   const [consultingList, setConsultingList] = useState([]);
   const [detailFocusStatus, setDetailFocusStatus] = useState();
-
-  console.log(consultingList)
 
   useEffect(() => {
     switch (location.pathname) {
@@ -57,7 +59,6 @@ function Calendar() {
 
   const initPatientData = async function () {
     try {
-      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
       const response = await getPatientInfoById(sessionToken, patientId);
       setPatientData(response.data.response);
       initHistoryList(patientId);
@@ -94,8 +95,6 @@ function Calendar() {
         } catch (error) {
           //alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
         }
-
-        const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
 
         try {
           const response = await getTreatmentInformation(sessionToken, history.fullDocument.treatment_appointment.id);
@@ -164,7 +163,13 @@ function Calendar() {
   }
 
   function enteranceTimeDisabled(startTime) {
-    const targetTime = moment(startTime).add(9, 'hours').subtract(4, 'minutes');
+    const targetTime = moment(startTime).subtract(4, 'minutes');
+    const currentTime = moment();
+    return currentTime.isBefore(targetTime);
+  }
+
+  function afterTreatmentEndTime(startTime) {
+    const targetTime = moment(startTime).add(10, 'minutes');
     const currentTime = moment();
     return currentTime.isBefore(targetTime);
   }
@@ -328,10 +333,10 @@ function Calendar() {
                   <Text T5>{item.fullDocument.treatment_appointment.doctor.department} / {item.fullDocument.treatment_appointment.doctor.name} 님</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).add(9, 'hours').format('YYYY-MM-DD HH:mm')}</Text>
+                  <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{item.status === "RESERVED" ? item.appointment_data?.status === "RESERVATION_CONFIRMED" ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
+                  <Text T5>{item.status === "RESERVED" ? (item.appointment_data?.status === "RESERVATION_CONFIRMED" && !item?.treatment_data) ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
@@ -339,18 +344,22 @@ function Calendar() {
                   }
                 </ConsultingSection3>
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
-                  {(item.status === "RESERVED" && (item.appointment_data?.status === "RESERVATION_CONFIRMED" || !item?.treatment_data))
+                  {item.status === "RESERVED"
                     && <Row>
-                      <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
-                        e.stopPropagation();
-                        //if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
-                          navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
-                        //}
-                      }}>
-                        <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{item.appointment_data?.status === "RESERVATION_CONFIRMED" ? '진료실 입장' : '소견서 작성'}</Text>
-                      </ConsultingButton>
                       {
-                        item.appointment_data?.status === "RESERVATION_CONFIRMED" && <ConsultingButton onClick={(e)=>{
+                        (!item?.treatment_data && item.fullDocument.treatment_appointment.doctor.id===storedLoginData.id)
+                          && <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
+                          e.stopPropagation();
+                          if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
+                            navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                          }
+                        }}>
+                          <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{afterTreatmentEndTime(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? '진료실 입장' : '소견서 작성'}</Text>
+                        </ConsultingButton>
+                      }
+                      
+                      {
+                        enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) && <ConsultingButton onClick={(e)=>{
                           e.stopPropagation();
                           handleCancelTreatmentAppointment(item.fullDocument);
                         }}>
