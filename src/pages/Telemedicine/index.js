@@ -48,8 +48,15 @@ function Telemedicine() {
   const [medicalOpinion, setMedicalOpinion] = useState('');
 
   useEffect(() => {
-    startCapture();
-  }, []);
+    if(treatmentData?.hospital_treatment_room?.start_time){
+      const startTime = moment(treatmentData?.hospital_treatment_room?.start_time).subtract(5, 'minutes');
+      const endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(5, 'minutes');
+      const currentTime = moment();
+      if(startTime.isBefore(currentTime) && currentTime.isBefore(endTime)){
+        startCapture();
+      }
+    }
+  }, [treatmentData]);
 
   useEffect(() => {
     if (treatmentId) {
@@ -76,13 +83,11 @@ function Telemedicine() {
         const treatmentHistory = historyResponse.data.response;
 
         for (let ii = 0; ii < treatmentHistory.length; ii++) {
-          if(treatmentHistory[ii].status !== 'RESERVATION_CONFIRMED'){
-            try {
-              const treatmentResponse = await getTreatmentResults(sessionToken, treatmentHistory[ii].id);
-              treatmentHistory[ii].treatmentData = treatmentResponse.data.response[0];
-            } catch (error) {
-              //alert('네트워크 오류로 인해 이전 진료 정보를 불러오지 못했습니다.');
-            }
+          try {
+            const treatmentResponse = await getTreatmentResults(sessionToken, treatmentHistory[ii].id);
+            treatmentHistory[ii].treatmentData = treatmentResponse.data.response[0];
+          } catch (error) {
+            //alert('네트워크 오류로 인해 이전 진료 정보를 불러오지 못했습니다.');
           }
         }
 
@@ -122,7 +127,7 @@ function Telemedicine() {
         const videoURL = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = videoURL;
-        link.download = 'recorded-video.mp4';
+        link.download = `${treatmentId}.mp4`;
         link.click();
       };
 
@@ -207,7 +212,7 @@ function Telemedicine() {
         await submitTreatment(sessionToken, treatmentData.id, data);
         navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
       } catch (error) {
-        alert('네트워크 오류로 인해 환자 정보를 불러오지 못했습니다.');
+        alert(error.data.message);
       }
     }
   }
@@ -452,15 +457,16 @@ function Telemedicine() {
       <TelemedicineSector1>
         <TelemedicineTitleBox>
           <Text T6 bold color="#565965">진료 예약 일자</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY-MM-DD // HH:mm')}</Text>
+          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY-MM-DD // HH:mm')}</Text>
           <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(15, 'minutes').format('HH:mm')}</Text>
+          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes').format('HH:mm')}</Text>
           {/* <TelemedicineClock>
             <Text T6 color="#565965">{elapsedTime}</Text>
           </TelemedicineClock> */}
         </TelemedicineTitleBox>
 
-        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').add(10, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
+        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(5, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
+        {/* <Iframe src={`https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" /> */}
         {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=2024-07-10T02:00:00.000Z`} allow="camera; microphone" /> */}
       </TelemedicineSector1>
 
@@ -512,7 +518,7 @@ function Telemedicine() {
             consultingData.map((item, index) => {
               if(item?.treatmentData){
                 return (
-                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).add(9, 'hours').format('YY-MM-DD')} / {item?.doctor?.department} / {item?.treatmentData?.disease?.한글명}</Text>
+                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department} / {item?.treatmentData?.disease?.한글명}</Text>
                 )
               }
             })
@@ -746,7 +752,7 @@ function Telemedicine() {
           </LineButton>
           <LineButton onClick={()=>{
             stopCapture();
-            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).add(9, 'hours').format('DD')}`, '_blank')
+            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).format('DD')}`, '_blank')
           }}>
             <Text T6 medium>진료영상 첨부</Text>
           </LineButton>
@@ -754,7 +760,7 @@ function Telemedicine() {
             <Text T6 medium>{isDiagnosisOpend?'미리보기 닫기':'소견서 미리보기'}</Text>
           </LineButton>
           <SaveButton onClick={()=>handleTreatmentSubmit()}>
-            <Text T6 medium color='#FFFFFF'>제출</Text>
+            <Text T6 medium color='#FFFFFF'>완료</Text>
           </SaveButton>
         </Row>
       </TelemedicineSector2>
