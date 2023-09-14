@@ -194,7 +194,7 @@ function Telemedicine() {
       return;
     }
 
-    const result = window.confirm("진단서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
+    const result = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
     if (result) {
       const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
       const data = {
