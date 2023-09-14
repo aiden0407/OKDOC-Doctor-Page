@@ -38,7 +38,7 @@ function Telemedicine() {
   const [subjectiveSymtoms, setSubjectiveSymtoms] = useState('');
   const [objectiveFindings, setObjectiveFindings] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
-  const [diagnosisType, setDiagnosisType] = useState();
+  const [diagnosisType, setDiagnosisType] = useState('presumptive');
   const [diagnosisCode, setDiagnosisCode] = useState('');
   const [diagnosisId, setDiagnosisId] = useState('');
   const [diagnosisList, setDiagnosisList] = useState([]);
