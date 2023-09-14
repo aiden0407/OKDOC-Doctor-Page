@@ -262,7 +262,7 @@ function Schedule() {
         events={events}
         eventClick={handleEventClick}
         select={handleSelect}
-        eventColor={COLOR.SUB3}
+        eventColor={COLOR.SUB2}
         nowIndicator={true}
         locale="kr"
       />
