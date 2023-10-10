@@ -130,14 +130,7 @@ function Schedule() {
   };
 
   const handleEventClick = (info) => {
-    if(editable){
-      const targetTime = moment(info.event.startStr);
-      const currentTime = moment();
-      if(targetTime.isBefore(currentTime)){
-        alert('이미 지난 시간은 삭제할 수 없습니다.');
-        return ;
-      }
-
+    if (editable) {
       const result = window.confirm("이 스케줄을 삭제하시겠습니까?");
       if (result) {
         const filteredEvents = events.filter(event => {
@@ -200,17 +193,26 @@ function Schedule() {
       if (endTime.getMinutes() === 30) {
         endTime.setMinutes(20);
       }
+
+      // 1주일(7일) 전의 시간을 계산합니다.
+      const currentTime = new Date();
+      const oneWeekAgo = new Date(currentTime);
+      oneWeekAgo.setDate(currentTime.getDate() - 7);
   
       // 정각부터 시작하여 20분 단위로 이벤트를 생성합니다.
       while (startTime < endTime) {
-        const slotEndTime = new Date(startTime);
-        slotEndTime.setMinutes(startTime.getMinutes() + 20);
-  
-        // 다음 20분 슬롯을 생성합니다.
-        result.push({
-          open_at: startTime.toISOString(),
-          close_at: slotEndTime.toISOString()
-        });
+
+        // 1주일(7일) 이전 스케줄은 스킵합니다.
+        if(startTime > oneWeekAgo){
+          const slotEndTime = new Date(startTime);
+          slotEndTime.setMinutes(startTime.getMinutes() + 20);
+
+          // 다음 20분 슬롯을 생성합니다.
+          result.push({
+            open_at: startTime.toISOString(),
+            close_at: slotEndTime.toISOString()
+          });
+        }
   
         // 다음 슬롯을 위해 20분을 더해줍니다.
         startTime.setMinutes(startTime.getMinutes() + 20);
