@@ -190,7 +190,7 @@ function Calendar() {
               <Text T5 bold>이름</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{patientData?.passport?.user_name}</Text>
+              <Text T5 medium>{patientData?.passport?.user_name ?? patientData?.passapp_certification?.name}</Text>
             </ContentsText>
           </Row>
           <Row marginTop={3}>
@@ -198,7 +198,7 @@ function Calendar() {
               <Text T5 bold>성별</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{patientData?.gender === 'MALE' ? '남성' : '여성'}</Text>
+              <Text T5 medium>{patientData?.gender ? (patientData?.gender === 'MALE' ? '남성' : '여성') : (patientData?.passapp_certification?.gender === 'male' ? '남성' : '여성')}</Text>
             </ContentsText>
           </Row>
           <Row marginTop={3}>
@@ -206,7 +206,7 @@ function Calendar() {
               <Text T5 bold>생년월일</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{formatDate(String(patientData?.passport?.birth))}</Text>
+              <Text T5 medium>{patientData?.passport ? formatDate(String(patientData?.passport?.birth)) : patientData?.passapp_certification?.birthday.replaceAll('-', '.')}</Text>
             </ContentsText>
           </Row>
         </PatientInfoBox>

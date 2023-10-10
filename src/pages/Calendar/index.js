@@ -53,7 +53,7 @@ function Calendar() {
         const biddingInfo = biddingInfos[index];
 
         scheduleList.push({
-          title: `${appointment.patient.passport.user_name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
+          title: `${appointment.patient?.passport?.user_name ?? appointment.patient?.passapp_certification?.name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
           date: biddingInfo.wish_at,
           url: `/calendar/detail?id=${appointment.patient.id}`,
         });

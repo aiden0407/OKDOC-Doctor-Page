@@ -235,13 +235,13 @@ function Telemedicine() {
             <PdfText style={styles.title}>환자의 성명</PdfText>
           </View>
           <View style={styles.contentBox1}>
-            <PdfText style={styles.content}>{treatmentData?.patient?.passport?.user_name}</PdfText>
+            <PdfText style={styles.content}>{treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}</PdfText>
           </View>
           <View style={styles.titleBox1}>
             <PdfText style={styles.title}>환자 생년월일</PdfText>
           </View>
           <View style={styles.contentBox1}>
-            <PdfText style={styles.content}>{formatDate(String(treatmentData?.patient?.passport?.birth))}</PdfText>
+            <PdfText style={styles.content}>{treatmentData?.patient?.passport ? formatDate(String(treatmentData?.patient?.passport?.birth)) : treatmentData?.patient?.passapp_certification?.birthday.replaceAll('-', '.')}</PdfText>
           </View>
         </View>
 
@@ -478,7 +478,7 @@ function Telemedicine() {
               <Text T5 bold>이름</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.passport?.user_name}</Text>
+              <Text T5 medium>{treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}</Text>
             </ContentsText>
           </Row>
           <Row>
@@ -486,7 +486,7 @@ function Telemedicine() {
               <Text T5 bold>성별</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.gender === 'MALE' ? '남성' : '여성'}</Text>
+              <Text T5 medium>{treatmentData?.patient?.gender ? (treatmentData?.patient?.gender === 'MALE' ? '남성' : '여성') : (treatmentData?.patient?.passapp_certification?.gender === 'male' ? '남성' : '여성')}</Text>
             </ContentsText>
           </Row>
           <Row>
@@ -494,7 +494,7 @@ function Telemedicine() {
               <Text T5 bold>생년월일</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{formatDate(String(treatmentData?.patient?.passport?.birth))}</Text>
+              <Text T5 medium>{treatmentData?.patient?.passport ? formatDate(String(treatmentData?.patient?.passport?.birth)) : treatmentData?.patient?.passapp_certification?.birthday.replaceAll('-', '.')}</Text>
             </ContentsText>
           </Row>
         </InfoBox33>
@@ -752,7 +752,7 @@ function Telemedicine() {
           </LineButton>
           <LineButton onClick={()=>{
             stopCapture();
-            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).format('DD')}`, '_blank')
+            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).format('DD')}`, '_blank')
           }}>
             <Text T6 medium>진료영상 첨부</Text>
           </LineButton>
