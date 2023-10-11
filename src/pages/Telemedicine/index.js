@@ -187,6 +187,7 @@ function Telemedicine() {
     } else {
       setDiagnosisList([]);
       setIsDiagnosisListOpen(false);
+      setDiagnosisCode('')
     }
   };
 
@@ -1068,6 +1069,7 @@ const SearchBoxColumn = styled(Column)`
   top: 38px;
   left: 10px;
   height: 100px;
+  border: 1px solid ${COLOR.GRAY4};
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
