@@ -47,6 +47,8 @@ function Telemedicine() {
   const [plan, setPlan] = useState('');
   const [medicalOpinion, setMedicalOpinion] = useState('');
 
+  const [isFinishButtonHovered, setIsFinishButtonHovered] = useState(false);
+
   useEffect(() => {
     if(treatmentData?.hospital_treatment_room?.start_time){
       const startTime = moment(treatmentData?.hospital_treatment_room?.start_time).subtract(5, 'minutes');
@@ -188,32 +190,46 @@ function Telemedicine() {
     }
   };
 
-  const handleTreatmentSubmit = async function () {
-    if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType || !assessment.length || !plan.length || !medicalOpinion.length) {
-      alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
-      return;
+  const handleLeaveRoom = async function () {
+    const result1 = window.confirm("진료 영상을 제출하셨습니까?");
+    if (result1) {
+      navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+    } else {
+      alert('진료 영상을 먼저 제출해주시기 바랍니다.');
     }
+  }
 
-    const result = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
-    if (result) {
-      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
-      const data = {
-        "chief_complaint": CC,
-        "subjective_symptom": subjectiveSymtoms,
-        "objective_finding": objectiveFindings,
-        "disease_id": diagnosisId,
-        "diagnosis_type": diagnosisType,
-        "assessment": assessment,
-        "plan": plan,
-        "medical_opinion": medicalOpinion
+  const handleTreatmentSubmit = async function () {
+    const result1 = window.confirm("진료 영상을 제출하셨습니까?");
+    if (result1) {
+      if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType || !assessment.length || !plan.length || !medicalOpinion.length) {
+        alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
+        return;
       }
 
-      try {
-        await submitTreatment(sessionToken, treatmentData.id, data);
-        navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
-      } catch (error) {
-        alert(error.data.message);
+      const result2 = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
+      if (result2) {
+        const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
+        const data = {
+          "chief_complaint": CC,
+          "subjective_symptom": subjectiveSymtoms,
+          "objective_finding": objectiveFindings,
+          "disease_id": diagnosisId,
+          "diagnosis_type": diagnosisType,
+          "assessment": assessment,
+          "plan": plan,
+          "medical_opinion": medicalOpinion
+        }
+  
+        try {
+          await submitTreatment(sessionToken, treatmentData.id, data);
+          navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+        } catch (error) {
+          alert(error.data.message);
+        }
       }
+    } else {
+      alert('진료 영상을 먼저 제출해주시기 바랍니다.');
     }
   }
 
@@ -759,9 +775,21 @@ function Telemedicine() {
           <LineButton onClick={()=>setIsDiagnosisOpend(!isDiagnosisOpend)}>
             <Text T6 medium>{isDiagnosisOpend?'미리보기 닫기':'소견서 미리보기'}</Text>
           </LineButton>
-          <SaveButton onClick={()=>handleTreatmentSubmit()}>
-            <Text T6 medium color='#FFFFFF'>완료</Text>
-          </SaveButton>
+
+          <Column style={{position: 'relative'}} onMouseEnter={() => setIsFinishButtonHovered(true)} onMouseLeave={() => setIsFinishButtonHovered(false)}>
+            <SaveButtonMenu1 className={isFinishButtonHovered && 'open'} onClick={()=>handleLeaveRoom()}>
+              <Text T6 medium color='#FFFFFF'>뒤로 가기</Text>
+            </SaveButtonMenu1>
+            
+            <SaveButtonMenu2 className={isFinishButtonHovered && 'open'} onClick={()=>handleTreatmentSubmit()}>
+              <Text T6 medium color='#FFFFFF'>최종 제출</Text>
+            </SaveButtonMenu2>
+
+            <SaveButton>
+              <Text T6 medium color='#FFFFFF'>완료</Text>
+            </SaveButton>
+          </Column>
+
         </Row>
       </TelemedicineSector2>
     </TelemedicineContainer>
@@ -980,7 +1008,56 @@ const SaveButton = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  z-index: 2;
 `
+
+const SaveButtonMenu1 = styled.div`
+  position: absolute;
+  top: 0;
+  max-height: 0;
+  width: 111px;
+  padding: 15px 20px;
+  background: ${COLOR.MAIN};
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1;
+  &.open {
+    top: -104px;
+    max-height: 1000px;
+  }
+  &:hover {
+    background: ${COLOR.SUB1};
+  }
+`;
+
+const SaveButtonMenu2 = styled.div`
+  position: absolute;
+  top: 0;
+  max-height: 0;
+  width: 111px;
+  padding: 15px 20px;
+  background: ${COLOR.MAIN};
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1;
+  &.open {
+    top: -52px;
+    max-height: 1000px;
+  }
+  &:hover {
+    background: ${COLOR.SUB1};
+  }
+`;
 
 const StyledRow = styled(Row)`
   align-items: flex-start;
