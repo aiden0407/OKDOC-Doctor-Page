@@ -22,6 +22,7 @@ function Schedule() {
 
   const [events, setEvents] = useState([]);
   const [editable, setEditable] = useState(false);
+  const [saveLodaing, setSaveLodaing] = useState(false);
 
   useEffect(() => {
     const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
@@ -223,6 +224,7 @@ function Schedule() {
   }
 
   const handleScheduleSave = async function () {
+    setSaveLodaing(true);
 
     const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
     const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
@@ -244,6 +246,7 @@ function Schedule() {
       return ;
     }
 
+    setSaveLodaing(false);
     alert('스케줄이 저장되었습니다.');
     window.location.reload();
   }
@@ -278,12 +281,16 @@ function Schedule() {
         }}>
           <Text T6 medium color={editable && COLOR.GRAY2}>수정</Text>
         </EditButton>
-        <SaveButton editable={editable} onClick={() => {
+        <SaveButton editable={editable && !saveLodaing} onClick={() => {
           if(editable){
             handleScheduleSave();
           }
         }}>
-          <Text T6 medium color={editable ? '#FFFFFF' : COLOR.GRAY1}>저장</Text>
+          {
+            saveLodaing
+            ?<Text T6 medium color={COLOR.GRAY1}>저장중</Text>
+            :<Text T6 medium color={editable ? '#FFFFFF' : COLOR.GRAY1}>저장</Text>
+          }
         </SaveButton>
       </Row>
     </ScheduleContainer>
