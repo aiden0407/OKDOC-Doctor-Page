@@ -175,19 +175,28 @@ function Telemedicine() {
   const handleTextChange = async (e) => {
     const searchText = e.target.value;
     setDiagnosis(searchText);
-    if(searchText){
-      try {
-        const response = await findDeases(searchText);
-        setDiagnosisList(response.data.response);
-        setIsDiagnosisListOpen(true);
-      } catch {
+
+    if (searchText) {
+      const searchTerms = searchText.split(','); // 쉼표로 분리
+      const lastSearchTerm = searchTerms[searchTerms.length - 1].trim(); // 마지막 검색어 추출 (공백 제거)
+  
+      if (lastSearchTerm) {
+        try {
+          const response = await findDeases(lastSearchTerm); // 마지막 검색어로 검색
+          setDiagnosisList(response.data.response);
+          setIsDiagnosisListOpen(true);
+        } catch {
+          setDiagnosisList([]);
+          setIsDiagnosisListOpen(false);
+        }
+      } else {
         setDiagnosisList([]);
         setIsDiagnosisListOpen(false);
       }
     } else {
       setDiagnosisList([]);
       setIsDiagnosisListOpen(false);
-      setDiagnosisCode('')
+      setDiagnosisCode('');
     }
   };
 
@@ -699,9 +708,29 @@ function Telemedicine() {
                       return (
                         <SearchBox key={item._id} onClick={() => {
                           setIsDiagnosisListOpen(false);
-                          setDiagnosis(item.한글명);
-                          setDiagnosisCode(item.상병기호);
-                          setDiagnosisId(item._id);
+
+                          const searchTerms = diagnosis.split(','); // 쉼표로 분리
+                          const lastSearchTerm = searchTerms[searchTerms.length - 1].trim(); // 마지막 검색어 추출 (공백 제거)
+                          const slicedDiagnosis = diagnosis.slice(0, diagnosis.lastIndexOf(lastSearchTerm)).trim();
+                          const updatedDiagnosis = slicedDiagnosis.slice(0, -1);
+
+                          if(updatedDiagnosis){
+                            setDiagnosis(updatedDiagnosis+', '+item.한글명);
+                          }else{
+                            setDiagnosis(item.한글명);
+                          }
+
+                          if(diagnosisCode){
+                            setDiagnosisCode(diagnosisCode+', '+item.상병기호);
+                          }else{
+                            setDiagnosisCode(item.상병기호);
+                          }
+
+                          if(diagnosisId){
+                            setDiagnosisId(diagnosisId+', '+item._id);
+                          }else{
+                            setDiagnosisId(item._id);
+                          }                          
                         }}>
                           <Text T6>{item.한글명} / {item.영문명}</Text>
                         </SearchBox>
