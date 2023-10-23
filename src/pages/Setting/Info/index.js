@@ -158,7 +158,7 @@ function Calendar() {
 
             <Row marginTop={36} style={{ width: '100%', padding: '0 10px' }}>
               <Text T4 bold style={{ width: '25%' }}>성별</Text>
-              <Text T4 style={{ width: '25%' }}>{profileData?.gender === 'MALE' ? '남성' : '여성'}</Text>
+              <Text T4 style={{ width: '25%' }}>{profileData?.gender === 'MALE' ? '남성' : profileData?.gender === 'FEMALE' ? '여성' : ''}</Text>
               <Text T4 bold style={{ width: '25%' }}>전화 번호</Text>
               <Text T4 style={{ width: '25%' }}>{profileData?.phone?.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}</Text>
             </Row>

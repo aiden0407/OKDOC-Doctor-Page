@@ -154,6 +154,15 @@ function Calendar() {
       }
     }
   }
+  function genderSelector(patientData) {
+    if(patientData?.gender === 'MALE' || patientData?.passapp_certification?.gender === 'male'){
+      return '남성';
+    }
+    if(patientData?.gender === 'FEMALE' || patientData?.passapp_certification?.gender === 'female'){
+      return '여성';
+    }
+    return null;
+  }
 
   function formatDate(inputDate) {
     const year = inputDate.substring(0, 4);
@@ -198,7 +207,7 @@ function Calendar() {
               <Text T5 bold>성별</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{patientData?.gender ? (patientData?.gender === 'MALE' ? '남성' : '여성') : (patientData?.passapp_certification?.gender === 'male' ? '남성' : '여성')}</Text>
+              <Text T5 medium>{genderSelector(patientData)}</Text>
             </ContentsText>
           </Row>
           <Row marginTop={3}>

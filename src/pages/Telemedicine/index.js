@@ -251,6 +251,16 @@ function Telemedicine() {
     return `${year}년 ${month}월 ${day}일`;
   }
 
+  function genderSelector(patientData) {
+    if(patientData?.gender === 'MALE' || patientData?.passapp_certification?.gender === 'male'){
+      return '남성';
+    }
+    if(patientData?.gender === 'FEMALE' || patientData?.passapp_certification?.gender === 'female'){
+      return '여성';
+    }
+    return null;
+  }
+
   const MyDocument = () => (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -512,7 +522,7 @@ function Telemedicine() {
               <Text T5 bold>성별</Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.gender ? (treatmentData?.patient?.gender === 'MALE' ? '남성' : '여성') : (treatmentData?.patient?.passapp_certification?.gender === 'male' ? '남성' : '여성')}</Text>
+              <Text T5 medium>{genderSelector(treatmentData?.patient)}</Text>
             </ContentsText>
           </Row>
           <Row>
