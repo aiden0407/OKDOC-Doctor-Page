@@ -26,7 +26,7 @@ function Calendar() {
   }, []);
 
   function validatePassword(password) {
-    const regExp = /^.*(?=^.{6,14}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[.?!@#$%^&*+=]).*$/;
+    const regExp = /^.*(?=^.{8,14}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[.?!@#$%^&*+=]).*$/;
     return regExp.test(password);
   }
 
@@ -108,7 +108,7 @@ function Calendar() {
             <InputWrapper>
               <TextInput
                 type="password"
-                placeholder="영문, 숫자, 특수문자 포함 6~14자"
+                placeholder="영문, 숫자, 특수문자 포함 8자~14자"
                 value={newPassword}
                 onChange={(event) => {
                   setNewPassword(event.target.value);
