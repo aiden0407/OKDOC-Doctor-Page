@@ -496,9 +496,6 @@ function Telemedicine() {
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY-MM-DD // HH:mm')}</Text>
           <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes').format('HH:mm')}</Text>
-          {/* <TelemedicineClock>
-            <Text T6 color="#565965">{elapsedTime}</Text>
-          </TelemedicineClock> */}
         </TelemedicineTitleBox>
 
         <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(5, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
@@ -551,7 +548,7 @@ function Telemedicine() {
         <InfoBox33>
           <Text T4 bold>Consulting</Text>
           {
-            consultingData.map((item, index) => {
+            consultingData?.map((item, index) => {
               if(item?.treatmentData){
                 return (
                   <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department} / {item?.treatmentData?.disease?.한글명}</Text>
@@ -818,7 +815,7 @@ function Telemedicine() {
 
           <Column style={{position: 'relative'}} onMouseEnter={() => setIsFinishButtonHovered(true)} onMouseLeave={() => setIsFinishButtonHovered(false)}>
             <SaveButtonMenu1 className={isFinishButtonHovered && 'open'} onClick={()=>handleLeaveRoom()}>
-              <Text T6 medium color='#FFFFFF'>뒤로 가기</Text>
+              <Text T6 medium color='#FFFFFF'>임시 저장</Text>
             </SaveButtonMenu1>
             
             <SaveButtonMenu2 className={isFinishButtonHovered && 'open'} onClick={()=>handleTreatmentSubmit()}>
@@ -872,14 +869,6 @@ const TelemedicineTitleBox = styled.div`
   background: ${COLOR.SUB3};
   justify-content: space-between;
   align-items: center;
-`
-
-const TelemedicineClock = styled.div`
-  min-width: 76px;
-  padding: 8px 18px;
-  border-radius: 5px;
-  border: 1px solid #000000;
-  background: #FFFFFF;
 `
 
 const Iframe = styled.iframe`
