@@ -27,6 +27,7 @@ function Telemedicine() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const treatmentId = searchParams.get('id');
+  const localStorageData = JSON.parse(localStorage.getItem('OKDOC_DOCTOR_OPINION')) ?? {};
 
   const [mediaRecorder, setMediaRecorder] = useState(null);
 
@@ -34,18 +35,18 @@ function Telemedicine() {
   const [consultingData, setConsultingData] = useState([]);
   const [isDiagnosisOpend, setIsDiagnosisOpend] = useState(false);
 
-  const [CC, setCC] = useState('');
-  const [subjectiveSymtoms, setSubjectiveSymtoms] = useState('');
-  const [objectiveFindings, setObjectiveFindings] = useState('');
-  const [diagnosis, setDiagnosis] = useState('');
-  const [diagnosisType, setDiagnosisType] = useState('presumptive');
-  const [diagnosisCode, setDiagnosisCode] = useState('');
-  const [diagnosisId, setDiagnosisId] = useState('');
+  const [CC, setCC] = useState(localStorageData?.[treatmentId]?.chief_complaint);
+  const [subjectiveSymtoms, setSubjectiveSymtoms] = useState(localStorageData?.[treatmentId]?.subjective_symptom ?? '');
+  const [objectiveFindings, setObjectiveFindings] = useState(localStorageData?.[treatmentId]?.objective_finding ?? '');
+  const [diagnosis, setDiagnosis] = useState(localStorageData?.[treatmentId]?.diagnosis ?? '');
+  const [diagnosisType, setDiagnosisType] = useState(localStorageData?.[treatmentId]?.diagnosis_type ?? 'presumptive');
+  const [diagnosisCode, setDiagnosisCode] = useState(localStorageData?.[treatmentId]?.diagnosis_code ?? '');
+  const [diagnosisId, setDiagnosisId] = useState(localStorageData?.[treatmentId]?.disease_id ?? '');
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [isDiagnosisListOpen, setIsDiagnosisListOpen] = useState(false);
-  const [assessment, setAssessment] = useState('');
-  const [plan, setPlan] = useState('');
-  const [medicalOpinion, setMedicalOpinion] = useState('');
+  const [assessment, setAssessment] = useState(localStorageData?.[treatmentId]?.assessment ?? '');
+  const [plan, setPlan] = useState(localStorageData?.[treatmentId]?.plan ?? '');
+  const [medicalOpinion, setMedicalOpinion] = useState(localStorageData?.[treatmentId]?.medical_opinion ?? '');
 
   const [isFinishButtonHovered, setIsFinishButtonHovered] = useState(false);
 
@@ -200,25 +201,44 @@ function Telemedicine() {
     }
   };
 
-  const handleLeaveRoom = async function () {
-    const result1 = window.confirm("진료 영상을 제출하셨습니까?");
-    if (result1) {
-      navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+  const handleTemporarySave = async function () {
+    const confirm1 = window.confirm("진료 영상을 제출하셨습니까?");
+    if (confirm1) {
+      localStorageData[treatmentId] = {
+        "chief_complaint": CC,
+        "subjective_symptom": subjectiveSymtoms,
+        "objective_finding": objectiveFindings,
+        "diagnosis": diagnosis,
+        "diagnosis_code": diagnosisCode,
+        "diagnosis_type": diagnosisType,
+        "disease_id": diagnosisId,
+        "assessment": assessment,
+        "plan": plan,
+        "medical_opinion": medicalOpinion
+      };
+      localStorage.setItem('OKDOC_DOCTOR_OPINION', JSON.stringify(localStorageData));
+
+      const confirm2 = window.confirm("임시 저장이 완료되었습니다.\n현재 페이지를 나가시겠습니까?");
+      if (confirm2) {
+        navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+      }
     } else {
       alert('진료 영상을 먼저 제출해주시기 바랍니다.');
     }
+
+    
   }
 
   const handleTreatmentSubmit = async function () {
-    const result1 = window.confirm("진료 영상을 제출하셨습니까?");
-    if (result1) {
+    const confirm1 = window.confirm("진료 영상을 제출하셨습니까?");
+    if (confirm1) {
       if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType || !assessment.length || !plan.length || !medicalOpinion.length) {
         alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
         return;
       }
 
-      const result2 = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
-      if (result2) {
+      const confirm2 = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
+      if (confirm2) {
         const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
         const data = {
           "chief_complaint": CC,
@@ -814,7 +834,7 @@ function Telemedicine() {
           </LineButton>
 
           <Column style={{position: 'relative'}} onMouseEnter={() => setIsFinishButtonHovered(true)} onMouseLeave={() => setIsFinishButtonHovered(false)}>
-            <SaveButtonMenu1 className={isFinishButtonHovered && 'open'} onClick={()=>handleLeaveRoom()}>
+            <SaveButtonMenu1 className={isFinishButtonHovered && 'open'} onClick={()=>handleTemporarySave()}>
               <Text T6 medium color='#FFFFFF'>임시 저장</Text>
             </SaveButtonMenu1>
             
