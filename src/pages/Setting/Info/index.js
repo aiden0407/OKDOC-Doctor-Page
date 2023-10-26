@@ -88,6 +88,11 @@ function Calendar() {
   }
 
   const handleDoctorDataSave = async function () {
+    if(!department || !strength.length || !field.length || !introductionTitle.length || !introduction.length){
+      alert('비어있는 항목이 존재합니다.');
+      return ;
+    }
+
     try {
       const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
       const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
@@ -100,7 +105,6 @@ function Calendar() {
         "self_introduction": introduction,
         "images": profileFile
       }
-      console.log(body)
       await editDoctorInfo(sessionToken, storedLoginData.id, body);
       getDoctorInfo(sessionToken);
     } catch (error) {
