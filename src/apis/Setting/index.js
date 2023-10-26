@@ -18,12 +18,20 @@ export const getDepartments = async function () {
 export const editDoctorInfo = async function (accessToken, doctorId, data) {
     const formData = new FormData();
     formData.append('department', data.department);
-    data.strength.forEach(function(strength) {
-        formData.append('strength', strength);
-    });
-    data.field.forEach(function(field) {
-        formData.append('field', field);
-    });
+    if(data.strength.length === 1){
+        formData.append('strength[]', data.strength);
+    } else {
+        data.strength.forEach(function(strength) {
+            formData.append('strength', strength);
+        });
+    }
+    if(data.field.length === 1){
+        formData.append('field[]', data.field);
+    } else {
+        data.field.forEach(function(field) {
+            formData.append('field', field);
+        });
+    }
     formData.append('self_introduction_title', data.self_introduction_title);
     formData.append('self_introduction', data.self_introduction);
     if(data.images){
