@@ -284,6 +284,16 @@ function Telemedicine() {
   const MyDocument = () => (
     <Document>
       <Page size="A4" style={styles.page}>
+
+        <PdfText style={styles.waterMark1}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark2}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark3}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark4}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark5}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark6}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark7}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark8}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+
         <PdfText style={styles.main}>소견서</PdfText>
 
         <View style={styles.row1}>
@@ -367,7 +377,6 @@ function Telemedicine() {
           </View>
         </View>
 
-        
       </Page>
     </Document>
   );
@@ -391,6 +400,78 @@ function Telemedicine() {
       alignItems: 'center',
       padding: '25px 40px',
       fontFamily: 'Nanum Gothic Regular'
+    },
+    waterMark1: {
+      position: 'absolute',
+      top: -50,
+      left: 50,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark2: {
+      position: 'absolute',
+      top: 250,
+      left: -50,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark3: {
+      position: 'absolute',
+      top: 550,
+      left: -150,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark4: {
+      position: 'absolute',
+      top: 150,
+      left: 250,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark5: {
+      position: 'absolute',
+      top: 450,
+      left: 150,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark6: {
+      position: 'absolute',
+      top: 750,
+      left: 50,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark7: {
+      position: 'absolute',
+      top: 350,
+      left: 450,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
+    },
+    waterMark8: {
+      position: 'absolute',
+      top: 650,
+      left: 350,
+      fontFamily: 'Nanum Gothic Regular',
+      fontSize: 11,
+      color: '#999',
+      transform: 'rotate(-45deg)',
     },
     main: {
       fontFamily: 'Nanum Gothic Bold',
