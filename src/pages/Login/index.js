@@ -45,7 +45,6 @@ function Login() {
 
     try {
       const response = await doctorLogin(email, password);
-      //const response = await doctorLogin('20201006@eulji.ac.kr', '12345678');
       sessionStorage.setItem('OKDOC_DOCTOR_TOKEN', response.data.response.accessToken);
       getDoctorInfo(response.data.response.accessToken)
     } catch (error) {
@@ -57,7 +56,7 @@ function Login() {
     try {
       const response = await getDoctorInfoByCredential(accessToken);
       sessionStorage.setItem('OKDOC_DOCTOR_INFO', JSON.stringify(response.data.response[0]));
-      if(password==='eulji1234*'){
+      if(password==='Eulji1234*'){
         alert('비밀번호를 변경해주세요.\n확인 버튼을 클릭 시, 비밀번호 변경을 도와드리겠습니다.')
         navigate('/setting/pw');
       } else {
