@@ -17,9 +17,10 @@ import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
 import folderIcon from 'assets/icons/folder.svg';
+import insungLogo from 'assets/images/insung_logo.png';
 
 //react-pdf
-import { Page, Text as PdfText, View, Font, Document, StyleSheet, PDFViewer } from '@react-pdf/renderer';
+import { Page, Text as PdfText, View, Image as PdfImage, Font, Document, StyleSheet, PDFViewer } from '@react-pdf/renderer';
 
 function Telemedicine() {
 
@@ -285,14 +286,15 @@ function Telemedicine() {
     <Document>
       <Page size="A4" style={styles.page}>
 
-        <PdfText style={styles.waterMark1}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfImage src={insungLogo} style={styles.waterMark} />
+        {/* <PdfText style={styles.waterMark1}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark2}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark3}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark4}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark5}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark6}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark7}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark8}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
+        <PdfText style={styles.waterMark8}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText> */}
 
         <PdfText style={styles.main}>소견서</PdfText>
 
@@ -401,78 +403,85 @@ function Telemedicine() {
       padding: '25px 40px',
       fontFamily: 'Nanum Gothic Regular'
     },
-    waterMark1: {
+    waterMark: {
       position: 'absolute',
-      top: -50,
-      left: 50,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
+      top: 270,
+      left: 160,
+      width: 300,
+      opacity: 0.2
     },
-    waterMark2: {
-      position: 'absolute',
-      top: 250,
-      left: -50,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark3: {
-      position: 'absolute',
-      top: 550,
-      left: -150,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark4: {
-      position: 'absolute',
-      top: 150,
-      left: 250,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark5: {
-      position: 'absolute',
-      top: 450,
-      left: 150,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark6: {
-      position: 'absolute',
-      top: 750,
-      left: 50,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark7: {
-      position: 'absolute',
-      top: 350,
-      left: 450,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
-    waterMark8: {
-      position: 'absolute',
-      top: 650,
-      left: 350,
-      fontFamily: 'Nanum Gothic Regular',
-      fontSize: 11,
-      color: '#999',
-      transform: 'rotate(-45deg)',
-    },
+    // waterMark1: {
+    //   position: 'absolute',
+    //   top: -50,
+    //   left: 50,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark2: {
+    //   position: 'absolute',
+    //   top: 250,
+    //   left: -50,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark3: {
+    //   position: 'absolute',
+    //   top: 550,
+    //   left: -150,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark4: {
+    //   position: 'absolute',
+    //   top: 150,
+    //   left: 250,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark5: {
+    //   position: 'absolute',
+    //   top: 450,
+    //   left: 150,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark6: {
+    //   position: 'absolute',
+    //   top: 750,
+    //   left: 50,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark7: {
+    //   position: 'absolute',
+    //   top: 350,
+    //   left: 450,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
+    // waterMark8: {
+    //   position: 'absolute',
+    //   top: 650,
+    //   left: 350,
+    //   fontFamily: 'Nanum Gothic Regular',
+    //   fontSize: 11,
+    //   color: '#EEE',
+    //   transform: 'rotate(-45deg)',
+    // },
     main: {
       fontFamily: 'Nanum Gothic Bold',
       fontSize: 20
