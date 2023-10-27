@@ -121,7 +121,7 @@ function Calendar() {
       setConsultingList(historyData);
 
     } catch (error) {
-      alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
+      //alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
     }
   }
 
