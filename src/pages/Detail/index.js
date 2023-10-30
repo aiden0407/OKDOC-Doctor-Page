@@ -349,7 +349,7 @@ function Calendar() {
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
-                    item.status === "RESERVED" && item?.appointment_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.disease?.한글명}</Text>
+                    item.status === "RESERVED" && item?.appointment_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.diseases?.[0]?.한글명}</Text>
                   }
                 </ConsultingSection3>
                 <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
@@ -450,7 +450,7 @@ function Calendar() {
                           </ConsultingTitle>
                           <ConsultingInput2
                             readOnly
-                            value={item?.treatment_data?.disease?.한글명}
+                            value={item?.treatment_data?.diseases?.[0]?.한글명}
                           />
                         </StyledRow>
                         <StyledRow marginTop={3}>
@@ -477,7 +477,7 @@ function Calendar() {
                           <ConsultingInput2
                             marginTop={6}
                             readOnly
-                            value={item?.treatment_data?.disease?.상병기호}
+                            value={item?.treatment_data?.diseases?.[0]?.상병기호}
                           />
                         </StyledRow>
                       </Column>
