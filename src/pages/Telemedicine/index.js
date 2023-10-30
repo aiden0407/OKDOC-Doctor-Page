@@ -199,6 +199,7 @@ function Telemedicine() {
       setDiagnosisList([]);
       setIsDiagnosisListOpen(false);
       setDiagnosisCode('');
+      setDiagnosisId('');
     }
   };
 
@@ -233,7 +234,7 @@ function Telemedicine() {
   const handleTreatmentSubmit = async function () {
     const confirm1 = window.confirm("진료 영상을 제출하셨습니까?");
     if (confirm1) {
-      if (!CC.length || !subjectiveSymtoms.length || !subjectiveSymtoms.length || !objectiveFindings.length || !diagnosisCode.length || !diagnosisType || !assessment.length || !plan.length || !medicalOpinion.length) {
+      if (!CC?.length || !subjectiveSymtoms?.length || !subjectiveSymtoms?.length || !objectiveFindings?.length || !diagnosisCode?.length || !diagnosisType || !assessment?.length || !plan?.length || !medicalOpinion?.length) {
         alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
         return;
       }
@@ -245,7 +246,7 @@ function Telemedicine() {
           "chief_complaint": CC,
           "subjective_symptom": subjectiveSymtoms,
           "objective_finding": objectiveFindings,
-          "disease_id": diagnosisId,
+          "diseases": diagnosisId.split(', '),
           "diagnosis_type": diagnosisType,
           "assessment": assessment,
           "plan": plan,
