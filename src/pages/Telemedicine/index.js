@@ -356,7 +356,7 @@ function Telemedicine() {
             </View>
             
             <View style={styles.column2}>
-              <PdfText style={styles.title}>(본 의사의 판단)</PdfText>
+              <PdfText style={styles.title}>(본 의사의 소견)</PdfText>
               <PdfText style={styles.content}>{medicalOpinion}</PdfText>
             </View>
           </View>
