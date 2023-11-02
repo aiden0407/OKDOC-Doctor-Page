@@ -103,7 +103,14 @@ function MenuTab() {
           }}>
             <Text T5>고객센터</Text>
           </SubMenuButton>
-          <SubMenuButton onClick={()=>{}}>
+          <SubMenuButton onClick={()=>{
+            const confirm1 = window.confirm("로그아웃 하시겠습니까?");
+            if (confirm1) {
+              sessionStorage.removeItem('OKDOC_DOCTOR_TOKEN');
+              sessionStorage.removeItem('OKDOC_DOCTOR_INFO');
+              window.location.reload();
+            }
+          }}>
             <Text T5>로그아웃</Text>
           </SubMenuButton>
         </SubMenuWrapper>
