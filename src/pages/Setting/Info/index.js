@@ -67,6 +67,16 @@ function Calendar() {
     }
   };
 
+  function genderSelector(gender) {
+    if(gender === 'MALE' || gender === 'male'){
+      return '남성';
+    }
+    if(gender === 'FEMALE' || gender === 'female'){
+      return '여성';
+    }
+    return null;
+  }
+
   function convertToHashtags(text) {
     const words = text.split(',');
     const hashtags = words.map(word => `#${word}`);
@@ -162,7 +172,7 @@ function Calendar() {
 
             <Row marginTop={36} style={{ width: '100%', padding: '0 10px' }}>
               <Text T4 bold style={{ width: '25%' }}>성별</Text>
-              <Text T4 style={{ width: '25%' }}>{profileData?.gender === 'MALE' ? '남성' : profileData?.gender === 'FEMALE' ? '여성' : ''}</Text>
+              <Text T4 style={{ width: '25%' }}>{genderSelector(profileData?.gender)}</Text>
               <Text T4 bold style={{ width: '25%' }}>전화 번호</Text>
               <Text T4 style={{ width: '25%' }}>{profileData?.phone?.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')}</Text>
             </Row>
