@@ -21,6 +21,14 @@ function MenuTab() {
   const [menuStatus, setMenuStatus] = useState('');
   const [isFirstMenuHovered, setIsFirstMenuHovered] = useState(false);
   const [isSecondMenuHovered, setIsSecondMenuHovered] = useState(false);
+  const [doctorInfo, setDoctorInfo] = useState();
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+    if(sessionStorageData){
+      setDoctorInfo(JSON.parse(sessionStorageData));
+    }
+  }, []);
 
   useEffect(() => {
     switch (location.pathname) {
@@ -79,6 +87,24 @@ function MenuTab() {
           </SubMenuButton>
           <SubMenuButton className={menuStatus === "비밀번호 변경" && 'selected'} onClick={()=>navigate('/setting/pw')}>
             <Text T5 bold={menuStatus === "비밀번호 변경"} color={menuStatus === "비밀번호 변경" && COLOR.MAIN}>비밀번호 변경</Text>
+          </SubMenuButton>
+          <SubMenuButton onClick={() => {
+            window.ChannelIO('boot', {
+              "pluginKey": "0733ee50-0e8f-49fa-995c-5a56df1ff476",
+              "profile": {
+                "name": `${doctorInfo.name} 의사`,
+                "email": `${doctorInfo.email}`,
+                "mobileNumber": `${doctorInfo.landline}`,
+              },
+              mobileMessengerMode: "iframe",
+              hideChannelButtonOnBoot: true
+            });
+            window.ChannelIO('showMessenger');
+          }}>
+            <Text T5>고객센터</Text>
+          </SubMenuButton>
+          <SubMenuButton onClick={()=>{}}>
+            <Text T5>로그아웃</Text>
           </SubMenuButton>
         </SubMenuWrapper>
       </Column>

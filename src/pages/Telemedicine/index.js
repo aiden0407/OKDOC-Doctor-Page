@@ -29,9 +29,17 @@ function Telemedicine() {
   const searchParams = new URLSearchParams(location.search);
   const treatmentId = searchParams.get('id');
   const localStorageData = JSON.parse(localStorage.getItem('OKDOC_DOCTOR_OPINION')) ?? {};
+  
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
+    if(sessionStorageData){
+      setDoctorInfo(JSON.parse(sessionStorageData));
+    }
+  }, []);
 
   const [mediaRecorder, setMediaRecorder] = useState(null);
 
+  const [doctorInfo, setDoctorInfo] = useState();
   const [treatmentData, setTreatmentData] = useState();
   const [consultingData, setConsultingData] = useState([]);
   const [isDiagnosisOpend, setIsDiagnosisOpend] = useState(false);
@@ -911,7 +919,19 @@ function Telemedicine() {
         </MDBox>
 
         <Row gap={10}>
-          <LineButton onClick={()=>window.ChannelIO('showMessenger')}>
+          <LineButton onClick={()=>{
+            window.ChannelIO('boot', {
+              "pluginKey": "0733ee50-0e8f-49fa-995c-5a56df1ff476",
+              "profile": {
+                "name": `${doctorInfo.name} 의사`,
+                "email": `${doctorInfo.email}`,
+                "mobileNumber": `${doctorInfo.landline}`,
+              },
+              mobileMessengerMode: "iframe",
+              hideChannelButtonOnBoot: true
+            });
+            window.ChannelIO('showMessenger');
+          }}>
             <Text T6 medium>고객센터 연결</Text>
           </LineButton>
           <LineButton onClick={()=>{
