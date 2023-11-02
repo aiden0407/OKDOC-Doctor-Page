@@ -124,7 +124,7 @@ function Login() {
           <LogoImage src={loginLogoImage} />
 
           <Text T1 bold marginTop={80}>비밀번호 변경</Text>
-          <Text T5 color={COLOR.GRAY2} marginTop={16}>가입하신 아이디(이메일)로 비밀번호를 변경하세요.</Text>
+          <Text T5 color={COLOR.GRAY2} marginTop={16} style={{minWidth:320}}>가입하신 아이디(이메일)로 비밀번호를 변경하세요.</Text>
           <InputWrapper style={{marginTop: '32px'}}>
             <IconImage src={mailIcon} />
             <BorderInput
@@ -272,14 +272,14 @@ const BorderInput = styled.input`
 
 const IconImage = styled(Image)`
   position: absolute;
-  top: 18px;
+  top: 16px;
   left: 24px;
   width: 24px;
 `
 
 const LineButton = styled.div`
   position: absolute;
-  top: 14px;
+  top: 13px;
   right: 17px;
   width: 60px;
   height: 30px;
