@@ -107,12 +107,19 @@ function Schedule() {
 
   const handleSelect = (info) => {
     const { start, end } = info;
-    const now = new Date();
+    const currentTime = new Date();
     const startTime = new Date(start);
     const endTime = new Date(end);
+    const twoWeekAfter = new Date(currentTime);
+    twoWeekAfter.setDate(currentTime.getDate() + 14);
 
-    if(startTime < now){
+    if(startTime < currentTime){
       alert('이미 지난 시간이 포함되어 있습니다.');
+      return ;
+    }
+
+    if(endTime > twoWeekAfter){
+      alert('14일 이내의 스케줄만 생성 가능합니다.');
       return ;
     }
 
@@ -132,6 +139,13 @@ function Schedule() {
 
   const handleEventClick = (info) => {
     if (editable) {
+      const currentTime = moment();
+      const targetTime = moment(info.event.startStr);
+      if(targetTime.isBefore(currentTime)){
+        alert('이미 지난 시간은 삭제할 수 없습니다.');
+        return ;
+      }
+
       const result = window.confirm("이 스케줄을 삭제하시겠습니까?");
       if (result) {
         const filteredEvents = events.filter(event => {
@@ -203,8 +217,8 @@ function Schedule() {
       // 정각부터 시작하여 20분 단위로 이벤트를 생성합니다.
       while (startTime < endTime) {
 
-        // 1주일(7일) 이전 스케줄은 스킵합니다.
-        if(startTime > oneWeekAgo){
+        // 현재 시간 이전 스케줄은 스킵합니다.
+        if(startTime > currentTime){
           const slotEndTime = new Date(startTime);
           slotEndTime.setMinutes(startTime.getMinutes() + 20);
 
@@ -238,9 +252,23 @@ function Schedule() {
         try {
           await openSchedule(sessionToken, storedLoginData.id, result[ii]);
         } catch (error) {
-          throw error;
+          //throw error;
         }
       }
+
+      // const findBiddingInformation = async function (loginToken, biddingId) {
+      //   try {
+      //     const response = await getBiddingInformation(loginToken, biddingId);
+      //     return response.data.response;
+      //   } catch (error) {
+      //     console.log(error);
+      //   }
+      // }
+      // const biddingInfoPromises = response.data.response.map((appointment) => {
+      //   return findBiddingInformation(sessionToken, appointment.bidding_id);
+      // });
+      // const biddingInfos = await Promise.all(biddingInfoPromises);
+
     } catch (error) {
       alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
       return ;
