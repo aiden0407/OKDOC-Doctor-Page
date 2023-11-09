@@ -47,6 +47,23 @@ export const getHistoryStatus = async function (documentKey) {
     }
 }
 
+export const getAuditLog = async function (fullDocumentId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/audits/?focus=/merchant/cancel/${fullDocumentId}&action=POST`,
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${process.env.REACT_APP_API_ADMIN_TOKEN}`
+            },
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
 export const getTreatmentByPatientId = async function (loginToken, patientId) {
     try {
         let options = {
@@ -85,6 +102,23 @@ export const getTreatmentResults = async function (loginToken, treatmentId) {
     try {
         let options = {
             url: `${process.env.REACT_APP_API_HOST}/treatments/?treatment_appointment_id=${treatmentId}`,
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${loginToken}`
+            }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+export const getInvoiceInformation = async function (loginToken, biddingId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/invoices/?bidding_id=${biddingId}`,
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${loginToken}`
