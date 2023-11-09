@@ -48,12 +48,13 @@ function Calendar() {
       });
   
       const biddingInfos = await Promise.all(biddingInfoPromises);
+      const currentTime = new Date();
 
       response.data.response.forEach((appointment, index) => {
         const biddingInfo = biddingInfos[index];
 
         scheduleList.push({
-          title: `${appointment.patient?.passport?.user_name ?? appointment.patient?.passapp_certification?.name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${appointment.status === 'RESERVATION_CONFIRMED' ? '예약' : '완료'}`,
+          title: `${appointment.patient?.passport?.user_name ?? appointment.patient?.passapp_certification?.name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${currentTime < new Date(biddingInfo.wish_at) ? '예약' : '완료'}`,
           date: biddingInfo.wish_at,
           url: `/calendar/detail?id=${appointment.patient.id}`,
         });
@@ -62,7 +63,7 @@ function Calendar() {
         }
         if(isDateInThisMonth(biddingInfo.wish_at)) {
           totalMonthCount += 1;
-          if(appointment.status === 'RESERVATION_CONFIRMED'){
+          if(currentTime < new Date(biddingInfo.wish_at)){
             leftMonthCount += 1;
           }
         }
