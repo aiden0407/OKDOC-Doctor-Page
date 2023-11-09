@@ -12,7 +12,7 @@ import { Image } from 'components/Image';
 import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
-import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getTreatmentInformation, getTreatmentResults, cancelTreatmentAppointment } from 'apis/Telemedicine';
+import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getAuditLog, getTreatmentInformation, getTreatmentResults, getInvoiceInformation, cancelTreatmentAppointment } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -35,6 +35,8 @@ function Calendar() {
   const [menuStatus, setMenuStatus] = useState('');
   const [consultingList, setConsultingList] = useState([]);
   const [detailFocusStatus, setDetailFocusStatus] = useState();
+
+  console.log(consultingList)
 
   useEffect(() => {
     switch (location.pathname) {
@@ -70,9 +72,13 @@ function Calendar() {
   const initHistoryList = async function (patientId) {
     try {
       const response = await getHistoryListByPatientId(patientId);
-      const historyData = response.data.response;
+      let puchaseHistory = response.data.response;
 
-      historyData.sort((a, b) => {
+      // 비딩 결제건에 대한 구매 목록만 필터링
+      puchaseHistory = puchaseHistory.filter(obj => obj.fullDocument?.bidding_id);
+
+      // 진료일시 빠른 순으로 정렬
+      puchaseHistory.sort((a, b) => {
         const startTimeA = new Date(a.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
         const startTimeB = new Date(b.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
         if (startTimeA.getTime() === startTimeB.getTime()) {
@@ -81,48 +87,129 @@ function Calendar() {
         return startTimeB - startTimeA;
       });
 
-      for (let ii = 0; ii < historyData.length; ii++) {
-        const history = historyData[ii];
-
+      // 각 히스토리의 도큐멘트 조회 후 취소 여부 확인
+      for (const obj of puchaseHistory) {
         try {
-          const response = await getHistoryStatus(history.documentKey._id);
+          const response = await getHistoryStatus(obj.documentKey._id);
           const document = response.data.response;
           if (document[document.length - 1].operationType === 'insert') {
-            history.status = 'RESERVED';
+            obj.STATUS = 'RESERVED';
           } else {
-            history.status = 'CANCELED'
+            obj.STATUS = 'CANCELED';
+
+            try {
+                const response = await getAuditLog(obj.fullDocument.id);
+                const auditLog = response.data.response[0];
+                // 취소 시간과 role 데이터를 통한 취소 주체 규명
+                const wishAtTime = new Date(obj.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
+                const CanceledTime = new Date(auditLog.createdAt);
+                if (CanceledTime < wishAtTime) {
+                    if (auditLog.principal?.role === 'family') obj.CANCELER = 'PATIENT';
+                    if (auditLog.principal?.role === 'administrator') obj.CANCELER = 'DOCTOR';
+                } else {
+                    if (auditLog.principal?.role === 'administrator') {
+                        obj.CANCELER = 'ADMIN';
+                    } else {
+                        obj.CANCELER = 'SYSTEM';
+                    }
+                }
+                obj.STATUS = 'CANCELED';
+            } catch (error) {
+                // console.log(error);
+            }
           }
         } catch (error) {
-          //alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
-        }
-
-        try {
-          const response = await getTreatmentInformation(sessionToken, history.fullDocument.treatment_appointment.id);
-          history.appointment_data = response.data.response;
-        } catch (error) {
-          //console.log(error);
-        }
-
-        try {
-          const response = await getBiddingInformation(sessionToken, history.fullDocument.treatment_appointment.bidding_id);
-          history.bidding_data = response.data.response;
-        } catch (error) {
-          //console.log(error);
-        }
-
-        try {
-          const response = await getTreatmentResults(sessionToken, history.fullDocument.treatment_appointment.id);
-          history.treatment_data = response.data.response[0];
-        } catch (error) {
-          //console.log(error);
+          // console.log(error);
         }
       }
 
-      setConsultingList(historyData);
+      // 취소되지 않은 히스토리의 소견서 조회
+      for (const obj of puchaseHistory) {
+        if (obj.STATUS === 'RESERVED') {
+          try {
+            // ==========의사 본인 진료 외 다른 의사의 소견서 조회 불가==========
+            const response = await getTreatmentResults(sessionToken, obj.fullDocument.treatment_appointment.id);
+            const opinion = response.data.response[0];
+            obj.treatment_data = opinion;
+            obj.STATUS = 'FINISHED';
+          } catch (error) {
+            // 소견서 제출 안된 케이스 => EXIT 여부 조회로 환자의 진료 확정 확인
+            try {
+              // ==========의사 본인 진료 외 다른 의사의 appointment 조회 불가==========
+              const response = await getTreatmentInformation(sessionToken, obj.fullDocument.treatment_appointment.id);
+              const appointmentData = response.data.response;
+              if (appointmentData.status === 'EXIT') {
+                obj.STATUS = 'FINISHED';
+              } else {
+                const currentTime = new Date();
+                const wishAtTime = new Date(obj.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
+                const remainingTime = wishAtTime - currentTime;
+                const remainingSeconds = Math.floor(remainingTime / 1000);
+
+                if (remainingSeconds < -600) {
+                  // 진료 후(정상 진료X)
+                  obj.STATUS = 'ABNORMAL_FINISHED';
+                } else if (remainingSeconds < 0) {
+                  // 진료 중
+                  obj.STATUS = 'IN_TREATMENT';
+                } else {
+                  // 진료 전
+                  // obj.STATUS = 'RESERVED';
+                }
+              }
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        }
+      }
+
+      // 모든 히스토리에 데이터 추가
+      for (const obj of puchaseHistory) {
+        // 비딩 데이터 추가
+        try {
+          const response = await getBiddingInformation(sessionToken, obj.fullDocument.treatment_appointment.bidding_id);
+          obj.bidding_data = response.data.response;
+        } catch (error) {
+          //console.log(error);
+        }
+
+        // 인보이스 확인
+        try {
+          await getInvoiceInformation(sessionToken, obj.bidding_id);
+          const currentTime = new Date();
+          const wishAtTime = new Date(obj.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
+          const remainingTime = wishAtTime - currentTime;
+          const remainingSeconds = Math.floor(remainingTime / 1000);
+
+          // 환자의 진료확정이 되지 않았으면서 인보이스가 생성되어있는 경우
+          if (obj.STATUS === 'ABNORMAL_FINISHED') {
+            if (remainingSeconds < -900) {
+              // 인보이스가 생성되어 있으면 완료
+              obj.STATUS = 'FINISHED';
+            } else {
+              // 인보이스가 생성되어 있으면 15분까지는 진료중
+              obj.STATUS = 'IN_TREATMENT';
+            }
+          }
+        } catch (error) {
+          // 연장이 없었어서 인보이스가 없는 경우
+          // console.log(error);
+        }
+      }
+
+      setConsultingList(puchaseHistory);
 
     } catch (error) {
       //alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
     }
+  }
+
+  function statusTranslator(status) {
+    if(status==='FINISHED' || status==='ABNORMAL_FINISHED') return '진료 완료';
+    if(status==='RESERVED') return '예약(진료 대기)';
+    if(status==='CANCELED') return '예약 취소';
+    if(status==='IN_TREATMENT') return '진료중';
   }
 
   const handleImageDownload = (file) => {
@@ -155,10 +242,10 @@ function Calendar() {
     }
   }
   function genderSelector(patientData) {
-    if(patientData?.gender === 'MALE' || patientData?.passapp_certification?.gender === 'male'){
+    if (patientData?.gender === 'MALE' || patientData?.passapp_certification?.gender === 'male') {
       return '남성';
     }
-    if(patientData?.gender === 'FEMALE' || patientData?.passapp_certification?.gender === 'female'){
+    if (patientData?.gender === 'FEMALE' || patientData?.passapp_certification?.gender === 'female') {
       return '여성';
     }
     return null;
@@ -335,7 +422,7 @@ function Calendar() {
               }}>
                 <ConsultingSection1>
                   {
-                    item.status === "RESERVED" && <Image src={arrowIcon} width={24} />
+                    item.STATUS !== "CANCELED" && <Image src={arrowIcon} width={24} />
                   }
                 </ConsultingSection1>
                 <ConsultingSection2>
@@ -345,30 +432,48 @@ function Calendar() {
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{item.status === "RESERVED" ? (item.appointment_data?.status === "RESERVATION_CONFIRMED" && !item?.treatment_data) ? '예약(진료 대기)' : '진료 완료' : '예약 취소'}</Text>
+                  <Text T5>{statusTranslator(item.STATUS)}</Text>
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
-                    item.status === "RESERVED" && item?.appointment_data?.status !== "RESERVATION_CONFIRMED" && <Text T5>{item?.treatment_data?.diseases?.[0]?.한글명}</Text>
+                    <StyledText T5>{item?.treatment_data?.diseases?.[0]?.한글명}</StyledText>
                   }
                 </ConsultingSection3>
-                <ConsultingSection3 style={{justifyContent: 'flex-start'}}>
-                  {item.status === "RESERVED"
+                <ConsultingSection3 style={{ justifyContent: 'flex-start' }}>
+                  {item.fullDocument.treatment_appointment.doctor.id === storedLoginData.id
                     && <Row>
                       {
-                        (!item?.treatment_data && item.fullDocument.treatment_appointment.doctor.id===storedLoginData.id)
-                          && <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
+                        (item.STATUS === "RESERVED")
+                        && <ConsultingButton disabled={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)} onClick={(e) => {
                           e.stopPropagation();
                           if (!enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time)) {
                             navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
                           }
                         }}>
-                          <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>{afterTreatmentEndTime(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? '진료실 입장' : '소견서 작성'}</Text>
+                          <Text T6 color={enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) ? COLOR.GRAY2 : "#106DF9"}>진료실 입장</Text>
                         </ConsultingButton>
                       }
-                      
                       {
-                        enteranceTimeDisabled(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time) && <ConsultingButton onClick={(e)=>{
+                        (item.STATUS === "IN_TREATMENT")
+                        && <ConsultingButton onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                        }}>
+                          <Text T6 color="#106DF9">진료실 입장</Text>
+                        </ConsultingButton>
+                      }
+                      {
+                        ((item.STATUS === 'FINISHED' || item.STATUS === 'ABNORMAL_FINISHED') && !item?.treatment_data)
+                        && <ConsultingButton onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/telemedicine?id=${item.fullDocument.treatment_appointment.id}`);
+                        }}>
+                          <Text T6 color="#106DF9">소견서 작성</Text>
+                        </ConsultingButton>
+                      }
+                      {
+                        (item.STATUS === "RESERVED")
+                        && <ConsultingButton onClick={(e) => {
                           e.stopPropagation();
                           handleCancelTreatmentAppointment(item.fullDocument);
                         }}>
@@ -379,7 +484,7 @@ function Calendar() {
                   }
                 </ConsultingSection3>
               </ConsultingLine>
-              <ConsultingDetail className={(item.status === "RESERVED" && detailFocusStatus === index) && 'open'}>
+              <ConsultingDetail className={(item.STATUS !== "CANCELED" && detailFocusStatus === index) && 'open'}>
                 <Box height={20} />
                 <Row style={{ width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Column style={{ width: '35%' }}>
@@ -678,7 +783,8 @@ const ConsultingInput3 = styled.textarea`
 `
 
 const ConsultingButton = styled.div`
-  margin-right: 25px;
+  margin-left: 10px;
+  margin-right: 15px;
   padding: 5px 10px;
   border-radius: 5px;
   background: ${(props) => props.disabled ? COLOR.GRAY5 : '#E8F1FF'};
@@ -694,4 +800,11 @@ const StyledRow = styled(Row)`
 
 const RadioButton = styled.input`
   margin: 0px;
+`
+
+const StyledText = styled(Text)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
 `
