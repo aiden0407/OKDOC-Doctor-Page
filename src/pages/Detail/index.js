@@ -821,4 +821,5 @@ const StyledText = styled(Text)`
   white-space: nowrap;
   text-overflow: ellipsis;
   width: 100%;
+  text-align: center;
 `
