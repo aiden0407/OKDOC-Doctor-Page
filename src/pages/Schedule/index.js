@@ -169,8 +169,8 @@ function Schedule() {
 
     // 초기 슬롯 설정
     let currentSlot = {
-      start: sortedSchedules[0].start,
-      end: sortedSchedules[0].end,
+      start: sortedSchedules[0]?.start,
+      end: sortedSchedules[0]?.end,
     };
 
     // 데이터를 반복하면서 병합 및 시간 조정 수행
@@ -209,10 +209,8 @@ function Schedule() {
         endTime.setMinutes(20);
       }
 
-      // 1주일(7일) 전의 시간을 계산합니다.
+      // 현재 시간을 계산합니다.
       const currentTime = new Date();
-      const oneWeekAgo = new Date(currentTime);
-      oneWeekAgo.setDate(currentTime.getDate() - 7);
   
       // 정각부터 시작하여 20분 단위로 이벤트를 생성합니다.
       while (startTime < endTime) {
@@ -238,11 +236,16 @@ function Schedule() {
   }
 
   function compareOpenAt(original, edit) {
+    const currentTime = new Date();
+    const filteredOriginal = original.filter(originalItem => {
+      const closeTime = new Date(originalItem.close_at);
+      return closeTime > currentTime;
+    });
     const newSchedules = [];
     const deletedOpenAt = [];
-  
-    // original 배열에 있는 open_at 값을 기준으로 edit 배열과 비교
-    original.forEach(originalItem => {
+
+    // filteredOriginal 배열에 있는 open_at 값을 기준으로 edit 배열과 비교
+    filteredOriginal.forEach(originalItem => {
       const foundInEdit = edit.find(editItem => editItem.open_at === originalItem.open_at);
   
       if (!foundInEdit) {
