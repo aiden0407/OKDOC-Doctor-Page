@@ -76,6 +76,9 @@ function Calendar() {
 
       // 비딩 결제건에 대한 구매 목록만 필터링
       puchaseHistory = puchaseHistory.filter(obj => obj.fullDocument?.bidding_id);
+      
+      // ==========의사 본인 진료 비딩 결제건에 대한 구매 목록만 필터링==========
+      puchaseHistory = puchaseHistory.filter(obj => obj.fullDocument.treatment_appointment.doctor.id === storedLoginData.id);
 
       // 진료일시 빠른 순으로 정렬
       puchaseHistory.sort((a, b) => {
@@ -168,6 +171,7 @@ function Calendar() {
       for (const obj of puchaseHistory) {
         // 비딩 데이터 추가
         try {
+          // ==========의사 본인 진료 외 다른 의사의 bidding 조회 불가==========
           const response = await getBiddingInformation(sessionToken, obj.fullDocument.treatment_appointment.bidding_id);
           obj.bidding_data = response.data.response;
         } catch (error) {
@@ -205,11 +209,21 @@ function Calendar() {
     }
   }
 
-  function statusTranslator(status) {
-    if(status==='FINISHED' || status==='ABNORMAL_FINISHED') return '진료 완료';
-    if(status==='RESERVED') return '예약(진료 대기)';
-    if(status==='CANCELED') return '예약 취소';
-    if(status==='IN_TREATMENT') return '진료중';
+  function statusTranslator(item) {
+    if(item.STATUS==='FINISHED' || item.STATUS==='ABNORMAL_FINISHED') return '진료 완료';
+    if(item.STATUS==='RESERVED') return '예약(진료 대기)';
+    if(item.STATUS==='IN_TREATMENT') return '진료중';
+    if(item.STATUS==='CANCELED') {
+      if(item.CANCELER==='PATIENT') {
+        return '취소';
+      }
+      if(item.CANCELER==='DOCTOR') {
+        return '거절';
+      }
+      if(item.CANCELER==='PATIENT') {
+        return '환불';
+      }
+    }
   }
 
   const handleImageDownload = (file) => {
@@ -432,7 +446,7 @@ function Calendar() {
                   <Text T5>{moment(item.fullDocument.treatment_appointment.hospital_treatment_room.start_time).format('YYYY-MM-DD HH:mm')}</Text>
                 </ConsultingSection2>
                 <ConsultingSection2>
-                  <Text T5>{statusTranslator(item.STATUS)}</Text>
+                  <Text T5>{statusTranslator(item)}</Text>
                 </ConsultingSection2>
                 <ConsultingSection3>
                   {
