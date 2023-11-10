@@ -16,7 +16,7 @@ import 'design/fullcalendar.css';
 
 //Api
 import { getDoctorInfoByCredential } from 'apis/Login';
-import { openSchedule, deleteAllSchedule } from 'apis/Schedule';
+import { openSchedule, closeSchedule } from 'apis/Schedule';
 
 function Schedule() {
 
@@ -140,7 +140,7 @@ function Schedule() {
   const handleEventClick = (info) => {
     if (editable) {
       const currentTime = moment();
-      const targetTime = moment(info.event.startStr);
+      const targetTime = moment(info.event.endStr);
       if(targetTime.isBefore(currentTime)){
         alert('이미 지난 시간은 삭제할 수 없습니다.');
         return ;
@@ -237,6 +237,31 @@ function Schedule() {
     return result;
   }
 
+  function compareOpenAt(original, edit) {
+    const newSchedules = [];
+    const deletedOpenAt = [];
+  
+    // original 배열에 있는 open_at 값을 기준으로 edit 배열과 비교
+    original.forEach(originalItem => {
+      const foundInEdit = edit.find(editItem => editItem.open_at === originalItem.open_at);
+  
+      if (!foundInEdit) {
+        deletedOpenAt.push(originalItem.open_at);
+      }
+    });
+  
+    // edit 배열에 있는 open_at 값을 기준으로 original 배열과 비교
+    edit.forEach(editItem => {
+      const foundInOriginal = original.find(originalItem => originalItem.open_at === editItem.open_at);
+  
+      if (!foundInOriginal) {
+        newSchedules.push(editItem);
+      }
+    });
+  
+    return { newSchedules, deletedOpenAt };
+  }
+
   const handleScheduleSave = async function () {
     setSaveLodaing(true);
 
@@ -244,34 +269,37 @@ function Schedule() {
     const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
     const storedLoginData = JSON.parse(sessionStorageData);
     const result = splitEventsIntoTimeSlots(events);
+    const { newSchedules, deletedOpenAt } = compareOpenAt(storedLoginData.schedules, result);
 
     try {
-      await deleteAllSchedule(sessionToken, storedLoginData.id);
-
-      for (let ii = 0; ii < result.length; ii++) {
+      // 스케줄 삭제 로직
+      const closeScheduleAsync = async function (item) {
         try {
-          await openSchedule(sessionToken, storedLoginData.id, result[ii]);
+          await closeSchedule(sessionToken, storedLoginData.id, item);
         } catch (error) {
-          //throw error;
+          // console.log(error);
         }
       }
+      const closeSchedulePromises = deletedOpenAt.map((item) => {
+        return closeScheduleAsync(item);
+      });
+      await Promise.all(closeSchedulePromises);
 
-      // const findBiddingInformation = async function (loginToken, biddingId) {
-      //   try {
-      //     const response = await getBiddingInformation(loginToken, biddingId);
-      //     return response.data.response;
-      //   } catch (error) {
-      //     console.log(error);
-      //   }
-      // }
-      // const biddingInfoPromises = response.data.response.map((appointment) => {
-      //   return findBiddingInformation(sessionToken, appointment.bidding_id);
-      // });
-      // const biddingInfos = await Promise.all(biddingInfoPromises);
+      // 스케줄 생성 로직
+      const openScheduleAsync = async function (item) {
+        try {
+          await openSchedule(sessionToken, storedLoginData.id, item);
+        } catch (error) {
+          // console.log(error);
+        }
+      }
+      const openSchedulePromises = newSchedules.map((item) => {
+        return openScheduleAsync(item);
+      });
+      await Promise.all(openSchedulePromises);
 
     } catch (error) {
-      alert('네트워크 오류로 인해 정보를 불러오지 못했습니다.');
-      return ;
+      // console.log(error);
     }
 
     setSaveLodaing(false);
