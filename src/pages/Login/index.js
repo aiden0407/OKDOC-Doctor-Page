@@ -57,7 +57,7 @@ function Login() {
       const response = await getDoctorInfoByCredential(accessToken);
       sessionStorage.setItem('OKDOC_DOCTOR_INFO', JSON.stringify(response.data.response[0]));
       if(password==='Eulji1234*'){
-        alert('비밀번호를 변경해주세요.\n확인 버튼을 클릭 시, 비밀번호 변경을 도와드리겠습니다.')
+        alert('보안을 위해 초기 비밀번호를 변경해주세요.\n확인 버튼을 클릭 시, 비밀번호 변경을 도와드리겠습니다.')
         navigate('/setting/pw');
       } else {
         navigate('/calendar');
