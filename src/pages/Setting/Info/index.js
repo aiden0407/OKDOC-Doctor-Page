@@ -38,7 +38,7 @@ function Calendar() {
       setProfileData(storedLoginData);
       setProfileImage(storedLoginData?.attachments[0]?.Location ?? storedLoginData.photo);
       setDepartment(storedLoginData.department_name);
-      setStrength(storedLoginData.strength.join(','));
+      setStrength(storedLoginData.strengths.join(','));
       setField(storedLoginData.fields.join('\n'));
       setIntroductionTitle(storedLoginData.self_introduction_title);
       setIntroduction(storedLoginData.self_introduction);

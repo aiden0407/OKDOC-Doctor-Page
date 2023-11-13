@@ -19,10 +19,10 @@ export const editDoctorInfo = async function (accessToken, doctorId, data) {
     const formData = new FormData();
     formData.append('department_name', data.department);
     if(data.strength.length === 1){
-        formData.append('strength[]', data.strength);
+        formData.append('strengths[]', data.strength);
     } else {
         data.strength.forEach(function(strength) {
-            formData.append('strength', strength);
+            formData.append('strengths', strength);
         });
     }
     if(data.field.length === 1){
