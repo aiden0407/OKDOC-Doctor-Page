@@ -164,7 +164,7 @@ function Calendar() {
               <Column marginLeft={40}>
                 <Row>
                   <Text T2 bold>{profileData?.name}</Text>
-                  <Text T4 bold marginTop={4}>&nbsp;/ {profileData?.hospital}</Text>
+                  <Text T4 bold marginTop={4}>&nbsp;/ {profileData?.hospital_name}</Text>
                 </Row>
                 <Text T3>{profileData?.email}</Text>
               </Column>
@@ -284,7 +284,7 @@ function Calendar() {
               <Image src={profileImage ?? defaultProfileIcon} width={66} height={66} borderRadius="50%" />
               <Column marginLeft={24}>
                 <Text T4 bold>{profileData?.name}</Text>
-                <Text T7 bold color={COLOR.GRAY1}>{profileData?.hospital}/{department}</Text>
+                <Text T7 bold color={COLOR.GRAY1}>{profileData?.hospital_name}/{department}</Text>
                 <Text T7 marginTop={12} color={COLOR.GRAY2}>{strength ? convertToHashtags(strength) : '#진료 증상'}</Text>
               </Column>
             </Row>
