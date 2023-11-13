@@ -26,10 +26,10 @@ export const editDoctorInfo = async function (accessToken, doctorId, data) {
         });
     }
     if(data.field.length === 1){
-        formData.append('field[]', data.field);
+        formData.append('fields[]', data.field);
     } else {
         data.field.forEach(function(field) {
-            formData.append('field', field);
+            formData.append('fields', field);
         });
     }
     formData.append('self_introduction_title', data.self_introduction_title);
