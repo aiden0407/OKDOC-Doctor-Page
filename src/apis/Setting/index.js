@@ -17,7 +17,7 @@ export const getDepartments = async function () {
 
 export const editDoctorInfo = async function (accessToken, doctorId, data) {
     const formData = new FormData();
-    formData.append('department', data.department);
+    formData.append('department_name', data.department);
     if(data.strength.length === 1){
         formData.append('strength[]', data.strength);
     } else {

@@ -670,7 +670,7 @@ function Telemedicine() {
             consultingData?.map((item, index) => {
               if(item?.treatmentData){
                 return (
-                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department} / {item?.treatmentData?.disease?.한글명}</Text>
+                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department_name} / {item?.treatmentData?.disease?.한글명}</Text>
                 )
               }
             })

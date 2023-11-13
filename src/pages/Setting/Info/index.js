@@ -37,7 +37,7 @@ function Calendar() {
       const storedLoginData = JSON.parse(sessionStorageData);
       setProfileData(storedLoginData);
       setProfileImage(storedLoginData?.attachments[0]?.Location ?? storedLoginData.photo);
-      setDepartment(storedLoginData.department);
+      setDepartment(storedLoginData.department_name);
       setStrength(storedLoginData.strength.join(','));
       setField(storedLoginData.field.join('\n'));
       setIntroductionTitle(storedLoginData.self_introduction_title);
