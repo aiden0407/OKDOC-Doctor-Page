@@ -35,7 +35,7 @@ export const getBiddingInformation = async function (loginToken, biddingId) {
 export const openSchedule = async function (loginToken, doctorId, schedule) {
     try {
         let options = {
-            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule`,
+            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule/open`,
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${loginToken}`
@@ -53,7 +53,7 @@ export const openSchedule = async function (loginToken, doctorId, schedule) {
 export const closeSchedule = async function (loginToken, doctorId, open_at) {
     try {
         let options = {
-            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule/scheduleId`,
+            url: `${process.env.REACT_APP_API_HOST}/doctors/${doctorId}/schedule/close`,
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${loginToken}`
