@@ -6,8 +6,9 @@
 
 # misc
 .env
-.env.development
 .env.production
+.env.staging
+.env.development
 
 # macOS
 .DS_Store
