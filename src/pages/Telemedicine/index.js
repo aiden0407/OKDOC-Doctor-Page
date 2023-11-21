@@ -12,7 +12,7 @@ import { Image } from 'components/Image';
 import { Row, Column } from 'components/Flex';
 
 //Api
-import { getTreatmentInformation, getTreatmentByPatientId, getTreatmentResults, submitTreatment, findDeases } from 'apis/Telemedicine';
+import { getTreatmentInformation, getTreatmentByPatientId, getTreatmentResults, submitTreatment, findDeases, getInvoiceInformation } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -80,15 +80,23 @@ function Telemedicine() {
     try {
       const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
       const response = await getTreatmentInformation(sessionToken, treatmentId);
-      const treatmentInformation = response.data.response;
+      let treatmentInformation = response.data.response;
 
       try {
         const biddingResponse = await getBiddingInformation(sessionToken, treatmentInformation.bidding_id);
         treatmentInformation.biddingData = biddingResponse.data.response;
-        setTreatmentData(treatmentInformation);
       } catch (error) {
         alert('네트워크 오류로 인해 진료 정보를 불러오지 못했습니다.');
       }
+
+      try {
+        const invoiceResponse = await getInvoiceInformation(sessionToken, treatmentInformation.bidding_id);
+        treatmentInformation.invoiceData = invoiceResponse.data.response;
+      } catch (error) {
+        // 인보이스 없음
+      }
+
+      setTreatmentData(treatmentInformation);
 
       try {
         const historyResponse = await getTreatmentByPatientId(sessionToken, treatmentInformation.patient.id);
@@ -289,6 +297,25 @@ function Telemedicine() {
       return '여성';
     }
     return null;
+  }
+
+  function meetingUrlGenerator() {
+    let endTime;
+    if(treatmentData?.invoiceData) {
+      endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes')
+    } else {
+      endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(10, 'minutes')
+    }
+
+    if(moment().isBefore(endTime)) {
+      const meetingNumber = treatmentData?.hospital_treatment_room?.id;
+      const userName = treatmentData?.doctor?.name;
+      const wishAt = treatmentData?.biddingData?.wish_atd;
+      return `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`;
+      // return `http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`;
+    } else {
+      return 'https://zoom.okdoc.app/meeting/doctor/end/';
+    }
   }
 
   const MyDocument = () => (
@@ -617,9 +644,7 @@ function Telemedicine() {
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes').format('HH:mm')}</Text>
         </TelemedicineTitleBox>
 
-        <Iframe src={moment().isBefore(moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes')) ? `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}` : 'https://zoom.okdoc.app/meeting/doctor/end/'} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
-        {/* <Iframe src={`https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" /> */}
-        {/* <Iframe src={`http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${treatmentData?.hospital_treatment_room?.id}&userName=${treatmentData?.doctor?.name} 의사&wishAt=${treatmentData?.biddingData?.wish_at}`} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" /> */}
+        <Iframe src={meetingUrlGenerator()} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
       </TelemedicineSector1>
 
       <TelemedicineSector2>
@@ -670,7 +695,7 @@ function Telemedicine() {
             consultingData?.map((item, index) => {
               if(item?.treatmentData){
                 return (
-                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department_name} / {item?.treatmentData?.disease?.한글명}</Text>
+                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department_name} / {item?.treatmentData?.diseases?.[0]?.한글명}</Text>
                 )
               }
             })
