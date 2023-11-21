@@ -12,16 +12,16 @@ dependencies 다운로드 / 환경변수 파일은 보안상의 이슈로 따로
 
 ### `npm run start`
 
-프로덕션 환경변수 구동
+프로덕션 서버 환경변수 구동
+
+### `npm run start:stg`
+
+스테이징 서버 환경변수 구동 (elastic beanstalk 서버 및 프로덕션 관리자 토큰 사용)
 
 ### `npm run start:dev`
 
-개발서버 환경변수 구동 (스테이징서버 사용 및 localhost 관리자토큰 사용)
+개발 서버 환경변수 구동 (dev tunnel 서버 및 localhost 관리자 토큰 사용)
 
 ### `npm run build`
 
-프로덕션 환경변수 빌드 (실배포 시 사용)
-
-### `npm run build:dev`
-
-개발서버 환경변수 빌드
+프로덕션 환경 빌드
