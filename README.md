@@ -8,7 +8,7 @@ OKDOC 참여 의사들을 위한 웹 페이지로 환자 관리, 스케줄 관�
 
 ### `npm install`
 
-dependencies 다운로드 / 환경변수 파일은 보안상의 이슈로 따로 아카이빙
+dependencies 다운로드 / 환경변수 파일은 따로 아카이빙
 
 ### `npm run start`
 
@@ -16,11 +16,11 @@ dependencies 다운로드 / 환경변수 파일은 보안상의 이슈로 따로
 
 ### `npm run start:stg`
 
-스테이징 서버 환경변수 구동 (elastic beanstalk 서버 및 프로덕션 관리자 토큰 사용)
+스테이징 서버 환경변수 구동 (elastic beanstalk 스테이징 서버 및 프로덕션 관리자 토큰 사용)
 
 ### `npm run start:dev`
 
-개발 서버 환경변수 구동 (dev tunnel 서버 및 localhost 관리자 토큰 사용)
+개발 서버 환경변수 구동 (MS dev tunnel 서버 및 localhost 관리자 토큰 사용)
 
 ### `npm run build`
 
