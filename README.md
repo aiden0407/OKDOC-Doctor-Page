@@ -10,7 +10,7 @@ OKDOC은 재외국민을 위한 대학병원 전문의 원격진료 서비스입
 
 OKDOC 참여 의사들을 위한 웹 페이지로 환자 관리, 스케줄 관리, 원격 진료, 소견서 작성 등의 목적을 지니고 있습니다.
 
-## OKDOC-Mobile-App 실행
+## OKDOC-Doctor-Page 실행
 
 #### `npm install`
 
