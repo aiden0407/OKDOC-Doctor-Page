@@ -84,7 +84,7 @@ function Login() {
   }
 
   function validatePassword(password) {
-    const regExp = /^.*(?=^.{6,14}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[.?!@#$%^&*+=]).*$/;
+    const regExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.?!@#$%^&*+=]).{8,14}$/;
     return regExp.test(password);
   }
 
@@ -98,7 +98,7 @@ function Login() {
       return;
     }
     if (!validatePassword(newPassword)) {
-      alert('비밀번호는 영문, 숫자, 특수문자 포함 6~14자로 구성되어야 합니다.');
+      alert('비밀번호는 대소문자, 숫자, 특수문자 포함 8자~14자로 구성되어야 합니다.');
       return;
     }
     if (newPassword !== confirmPassword) {
