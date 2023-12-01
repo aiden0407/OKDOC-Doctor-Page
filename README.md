@@ -26,7 +26,7 @@ dependencies 다운로드 / 환경변수 파일은 따로 아카이빙
 
 #### `npm run start:dev`
 
-개발 서버 환경변수 구동 (MS dev tunnel 서버 및 localhost 관리자 토큰 사용)
+로컬 서버 환경변수 구동 (MS dev tunnel 서버 및 local 서버 관리자 토큰 사용)
 
 #### `npm run build`
 
