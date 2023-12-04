@@ -36,7 +36,7 @@ function Calendar() {
 
   const initScheduleData = async function (sessionToken, loginData) {
     try {
-      const response = await getScheduleByDoctorId(loginData.id);
+      const response = await getScheduleByDoctorId(sessionToken, loginData.id);
 
       let scheduleList = [];
       let todayCount = 0;
@@ -54,7 +54,7 @@ function Calendar() {
         const biddingInfo = biddingInfos[index];
 
         scheduleList.push({
-          title: `${appointment.patient?.passport?.user_name ?? appointment.patient?.passapp_certification?.name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${currentTime < new Date(biddingInfo.wish_at) ? '예약' : '완료'}`,
+          title: `${appointment.patient?.passport?.user_name} / ${formatTimeFromISOString(biddingInfo.wish_at)} / ${currentTime < new Date(biddingInfo.wish_at) ? '예약' : '완료'}`,
           date: biddingInfo.wish_at,
           url: `/calendar/detail?id=${appointment.patient.id}`,
         });
