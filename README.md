@@ -31,3 +31,7 @@ dependencies 다운로드 / 환경변수 파일은 따로 아카이빙
 #### `npm run build`
 
 프로덕션 환경 빌드
+
+#### `npm run build:stg`
+
+스테이징 환경 빌드 (elastic beanstalk 스테이징 서버 및 프로덕션 관리자 토큰 사용)
