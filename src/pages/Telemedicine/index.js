@@ -17,7 +17,8 @@ import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
 import folderIcon from 'assets/icons/folder.svg';
-import insungLogo from 'assets/images/insung_logo.png';
+import euljiLogo from 'assets/images/eulji_logo.png';
+// import insungLogo from 'assets/images/insung_logo.png';
 
 //react-pdf
 import { Page, Text as PdfText, View, Image as PdfImage, Font, Document, StyleSheet, PDFViewer } from '@react-pdf/renderer';
@@ -322,7 +323,7 @@ function Telemedicine() {
     <Document>
       <Page size="A4" style={styles.page}>
 
-        <PdfImage src={insungLogo} style={styles.waterMark} />
+        <PdfImage src={euljiLogo} style={styles.waterMark} />
         {/* <PdfText style={styles.waterMark1}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark2}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
         <PdfText style={styles.waterMark3}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
@@ -441,8 +442,8 @@ function Telemedicine() {
     },
     waterMark: {
       position: 'absolute',
-      top: 270,
-      left: 160,
+      top: 260,
+      left: 165,
       width: 300,
       opacity: 0.2
     },
