@@ -412,7 +412,7 @@ function Telemedicine() {
             <PdfText style={styles.content}> </PdfText>
             <PdfText style={styles.content}>[○]의사 [ ]치과의사 [ ]한의사 면허번호 : 제 {treatmentData?.doctor?.id} 호</PdfText>
             <PdfText style={styles.content}> </PdfText>
-            <PdfText style={styles.content}>성명:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{treatmentData?.doctor?.name}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(서명)</PdfText>
+            <PdfText style={styles.content}>성명:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{treatmentData?.doctor?.name}</PdfText>
           </View>
         </View>
 
