@@ -50,7 +50,8 @@ export const getHistoryStatus = async function (documentKey) {
 export const getAuditLog = async function (fullDocumentId) {
     try {
         let options = {
-            url: `${process.env.REACT_APP_API_HOST}/audits/?focus=/merchant/cancel/${fullDocumentId}&action=POST`,
+            // url: `${process.env.REACT_APP_API_HOST}/audits/?focus=/merchant/cancel/${fullDocumentId}&action=POST`,
+            url: `${process.env.REACT_APP_API_HOST}/audits/?focus=/merchant/cashless-cancel/${fullDocumentId}&action=POST`,
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${process.env.REACT_APP_API_ADMIN_TOKEN}`
@@ -144,6 +145,24 @@ export const cancelTreatmentAppointment = async function (purchaseId, tid) {
                 tid: tid,
                 msg: "의사의 진료 취소 요청"
             }
+        }
+        const response = await axios(options);
+        return response;
+
+    } catch (error) {
+        throw error.response;
+    }
+}
+
+// [!PROMOTION] 0원 결제 취소부
+export const cancleCashlessTreatmentAppointment = async function (purchaseId) {
+    try {
+        let options = {
+            url: `${process.env.REACT_APP_API_HOST}/merchant/cashless-cancel/${purchaseId}`,
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${process.env.REACT_APP_API_ADMIN_TOKEN}`
+            },
         }
         const response = await axios(options);
         return response;
