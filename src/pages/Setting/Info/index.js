@@ -245,8 +245,7 @@ function Calendar() {
               <TextInput
                 disabled={!editable}
                 type="text"
-                placeholder="한줄 자기 소개를 입력해주세요. (30글자)"
-                maxLength={30}
+                placeholder="한줄 자기 소개를 입력해주세요."
                 value={introductionTitle}
                 onChange={(event) => {
                   setIntroductionTitle(event.target.value);
