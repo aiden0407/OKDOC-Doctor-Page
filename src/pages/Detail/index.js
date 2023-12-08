@@ -12,7 +12,7 @@ import { Image } from 'components/Image';
 import { Row, FlexBox, Column, Box } from 'components/Flex';
 
 //Api
-import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getAuditLog, getTreatmentInformation, getTreatmentResults, getInvoiceInformation, cancelTreatmentAppointment } from 'apis/Telemedicine';
+import { getPatientInfoById, getHistoryListByPatientId, getHistoryStatus, getAuditLog, getTreatmentInformation, getTreatmentResults, getInvoiceInformation, cancelTreatmentAppointment, cancleCashlessTreatmentAppointment } from 'apis/Telemedicine';
 import { getBiddingInformation } from 'apis/Schedule';
 
 //Assets
@@ -215,10 +215,10 @@ function Calendar() {
     if(item.STATUS==='IN_TREATMENT') return '진료중';
     if(item.STATUS==='CANCELED') {
       if(item.CANCELER==='PATIENT') {
-        return '취소';
+        return '예약 취소';
       }
       if(item.CANCELER==='DOCTOR') {
-        return '거절';
+        return '예약 거절';
       }
       if(item.CANCELER==='PATIENT') {
         return '환불';
@@ -247,7 +247,8 @@ function Calendar() {
     const result = window.confirm("해당 진료를 거절하시겠습니까?");
     if (result) {
       try {
-        await cancelTreatmentAppointment(purchaseInformation.id, purchaseInformation.P_TID);
+        // await cancelTreatmentAppointment(purchaseInformation.id, purchaseInformation.P_TID);
+        await cancleCashlessTreatmentAppointment(purchaseInformation.id);
         alert('해당 진료가 취소되었습니다.');
         window.location.reload();
       } catch (error) {
