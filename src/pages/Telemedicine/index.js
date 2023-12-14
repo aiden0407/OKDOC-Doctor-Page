@@ -59,6 +59,7 @@ function Telemedicine() {
   const [medicalOpinion, setMedicalOpinion] = useState(localStorageData?.[treatmentId]?.medical_opinion ?? '');
 
   const [isFinishButtonHovered, setIsFinishButtonHovered] = useState(false);
+  const [meetingUrl, setMeetingUrl] = useState();
 
   useEffect(() => {
     if(treatmentData?.hospital_treatment_room?.start_time){
@@ -90,11 +91,24 @@ function Telemedicine() {
         alert('네트워크 오류로 인해 진료 정보를 불러오지 못했습니다.');
       }
 
+      let endTime;
+
       try {
         const invoiceResponse = await getInvoiceInformation(sessionToken, treatmentInformation.bidding_id);
         treatmentInformation.invoiceData = invoiceResponse.data.response;
+        endTime = moment(treatmentInformation?.hospital_treatment_room?.start_time).add(15, 'minutes')
       } catch (error) {
         // 인보이스 없음
+        endTime = moment(treatmentInformation?.hospital_treatment_room?.start_time).add(10, 'minutes')
+      }
+
+      if (moment().isBefore(endTime)) {
+        const meetingNumber = treatmentInformation?.hospital_treatment_room?.id;
+        const userName = treatmentInformation?.doctor?.name;
+        const wishAt = treatmentInformation?.biddingData?.wish_at;
+        setMeetingUrl(`${process.env.REACT_APP_ZOOM_HOST}/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`);
+      } else {
+        setMeetingUrl(`${process.env.REACT_APP_ZOOM_HOST}/meeting/doctor/end/`);
       }
 
       setTreatmentData(treatmentInformation);
@@ -298,25 +312,6 @@ function Telemedicine() {
       return '여성';
     }
     return null;
-  }
-
-  function meetingUrlGenerator() {
-    let endTime;
-    if(treatmentData?.invoiceData) {
-      endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes')
-    } else {
-      endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(10, 'minutes')
-    }
-
-    if(moment().isBefore(endTime)) {
-      const meetingNumber = treatmentData?.hospital_treatment_room?.id;
-      const userName = treatmentData?.doctor?.name;
-      const wishAt = treatmentData?.biddingData?.wish_atd;
-      return `https://zoom.okdoc.app/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`;
-      // return `http://127.0.0.1:5500/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`;
-    } else {
-      return 'https://zoom.okdoc.app/meeting/doctor/end/';
-    }
   }
 
   const MyDocument = () => (
@@ -645,7 +640,7 @@ function Telemedicine() {
           <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes').format('HH:mm')}</Text>
         </TelemedicineTitleBox>
 
-        <Iframe src={meetingUrlGenerator()} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
+        <Iframe src={meetingUrl} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
       </TelemedicineSector1>
 
       <TelemedicineSector2>
