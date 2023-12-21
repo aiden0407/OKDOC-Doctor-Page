@@ -11,7 +11,8 @@ export const COLOR = {
     GRAY4: '#DBDBDB',
     GRAY5: '#E8E8E8',
     GRAY6: '#F2F2F5',
-    GRAY7: '#F7F8FA',
+    GRAY7: '#F6F6F6',
+    GRAY8: '#F7F8FA',
 }
 
 export const TYPOGRAPHY = {
