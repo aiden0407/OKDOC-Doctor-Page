@@ -25,7 +25,7 @@ function Layout({ children }) {
   const handleChangeColor = (value) => {
     switch (value) {
       case '/calendar/detail':
-      case '/schedule/detail':
+      case '/schedule':
       case '/telemedicine':
         return COLOR.GRAY7;
 

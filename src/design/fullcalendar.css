@@ -36,3 +36,13 @@ th .fc-scrollgrid-sync-inner {
 	--fc-event-border-color: #E3D0FF;
 	--fc-event-text-color: #000000;
 }
+
+.fc-view-harness {
+	background-color: #FFFFFF;
+}
+
+.fc .fc-toolbar.fc-header-toolbar {
+	background-color: transparent;
+	margin-bottom: 0;
+	padding-bottom: 20px;
+}
