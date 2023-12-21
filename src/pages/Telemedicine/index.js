@@ -57,16 +57,16 @@ function Telemedicine() {
   const [assessment, setAssessment] = useState(localStorageData?.[treatmentId]?.assessment ?? '');
   const [plan, setPlan] = useState(localStorageData?.[treatmentId]?.plan ?? '');
   const [medicalOpinion, setMedicalOpinion] = useState(localStorageData?.[treatmentId]?.medical_opinion ?? '');
+  const [memoContext, setMemoContext] = useState(localStorageData?.[treatmentId]?.memo_context ?? '');
 
   const [isFinishButtonHovered, setIsFinishButtonHovered] = useState(false);
   const [meetingUrl, setMeetingUrl] = useState();
 
   useEffect(() => {
     if(treatmentData?.hospital_treatment_room?.start_time){
-      const startTime = moment(treatmentData?.hospital_treatment_room?.start_time).subtract(5, 'minutes');
-      const endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(5, 'minutes');
+      const endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes');
       const currentTime = moment();
-      if(startTime.isBefore(currentTime) && currentTime.isBefore(endTime)){
+      if(currentTime.isBefore(endTime)){
         startCapture();
       }
     }
@@ -938,6 +938,16 @@ function Telemedicine() {
             </InputWrapper>
           </Section>
         </MDBox>
+        <MemoBox>
+          <Text T4 bold>Memo</Text>
+          <MemoArea
+            placeholder="MD note 작성 전, 메모장으로 활용해주세요."
+            value={memoContext}
+            onChange={(event) => {
+              setMemoContext(event.target.value);
+            }}
+          />
+        </MemoBox>
 
         <Row gap={10}>
           <LineButton onClick={()=>{
@@ -1091,11 +1101,45 @@ const InfoBox10 = styled.div`
 const MDBox = styled.div`
   width: 100%;
   display: flex;
+  flex: 4;
   flex-direction: column;
   padding: 10px 20px 20px 20px;
   border-radius: 12px;
   background-color: #FFFFFF;
   box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const MemoBox = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 10px 6px 10px 12px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `
 
 const ContentsTitle = styled.div`
@@ -1113,7 +1157,7 @@ const ContentsText = styled.div`
 
 const Section = styled(Row)`
   width: 100%;
-  border-bottom: 1px solid ${COLOR.GRAY7};
+  border-bottom: 1px solid ${COLOR.GRAY8};
   align-items: stretch;
 `;
 
@@ -1147,6 +1191,26 @@ const TextInput = styled.input`
 const TextArea = styled.textarea`
   width: 100%;
   height: 55px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid ${COLOR.GRAY4};
+  font-size: 13px;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`
+
+const MemoArea = styled.textarea`
+  margin-top: 5px;
+  width: 100%;
+  height: 100px;
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px solid ${COLOR.GRAY4};
