@@ -111,7 +111,7 @@ function Schedule() {
     const startTime = new Date(start);
     const endTime = new Date(end);
     const twoWeekAfter = new Date(currentTime);
-    twoWeekAfter.setDate(currentTime.getDate() + 14);
+    twoWeekAfter.setDate(currentTime.getDate() + 21);
 
     if(startTime < currentTime){
       alert('이미 지난 시간이 포함되어 있습니다.');
@@ -119,7 +119,7 @@ function Schedule() {
     }
 
     if(endTime > twoWeekAfter){
-      alert('14일 이내의 스케줄만 생성 가능합니다.');
+      alert('21일 이내의 스케줄만 생성 가능합니다.');
       return ;
     }
 
@@ -372,6 +372,7 @@ const EditButton = styled.div`
   justify-content: center;
   align-items: center;
   cursor: ${(props) => !props.editable && 'pointer'};
+  background-color: #FFFFFF;
 `
 
 const SaveButton = styled.div`
