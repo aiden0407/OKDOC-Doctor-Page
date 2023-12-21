@@ -36,8 +36,6 @@ function Calendar() {
   const [consultingList, setConsultingList] = useState([]);
   const [detailFocusStatus, setDetailFocusStatus] = useState();
 
-  console.log(consultingList)
-
   useEffect(() => {
     switch (location.pathname) {
       case '/calendar/detail':
@@ -172,7 +170,7 @@ function Calendar() {
         // 비딩 데이터 추가
         try {
           // ==========의사 본인 진료 외 다른 의사의 bidding 조회 불가==========
-          const response = await getBiddingInformation(sessionToken, obj.fullDocument.treatment_appointment.bidding_id);
+          const response = await getBiddingInformation(sessionToken, obj.fullDocument.bidding_id);
           obj.bidding_data = response.data.response;
         } catch (error) {
           //console.log(error);
@@ -180,7 +178,7 @@ function Calendar() {
 
         // 인보이스 확인
         try {
-          await getInvoiceInformation(sessionToken, obj.bidding_id);
+          await getInvoiceInformation(sessionToken, obj.fullDocument.bidding_id);
           const currentTime = new Date();
           const wishAtTime = new Date(obj.fullDocument.treatment_appointment.hospital_treatment_room.start_time);
           const remainingTime = wishAtTime - currentTime;
