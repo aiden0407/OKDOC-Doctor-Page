@@ -65,7 +65,7 @@ export const changePassword = async function (accessToken, email, password, newP
                 'Authorization': `Bearer ${accessToken}`,
             },
             data: {
-                email: email,
+                id: email,
                 password: password,
                 new_password: newPassword
             }

@@ -53,13 +53,13 @@ export const emailCheckOpen = async function (email) {
     }
 }
 
-export const emailCheckClose = async function (email, certificationNumber, emailToken) {
+export const emailCheckClose = async function (email, certificationNumber, verifiedToken) {
     try {
         let options = {
             url: `${process.env.REACT_APP_API_HOST}/authentication/email-check-close`,
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${emailToken}`
+                Authorization: `Bearer ${verifiedToken}`
             },
             data: {
                 email: email,
@@ -74,17 +74,19 @@ export const emailCheckClose = async function (email, certificationNumber, email
     }
 }
 
-export const changePassword = async function (email, newPassword, verificationToken) {
+export const resetPassword = async function (accessToken, email, newPassword, name, birth) {
     try {
         let options = {
-            url: `${process.env.REACT_APP_API_HOST}/authentication/doctor/temp-password`,
+            url: `${process.env.REACT_APP_API_HOST}/authentication/doctor/password-reset`,
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${verificationToken}`
+                Authorization: `Bearer ${accessToken}`
             },
             data: {
                 email: email,
                 new_password: newPassword,
+                name: name,
+                birth: '20240101' // 현재는 검증부는 사용하고 있지 않지만 필수항목이므로 고정해서 넣어 놓음
             }
         }
         const response = await axios(options);

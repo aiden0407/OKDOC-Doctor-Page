@@ -1,8 +1,9 @@
 {
   "name": "ok-doc-doctor-page",
-  "version": "0.1.0",
+  "version": "2.2.3",
   "private": true,
   "dependencies": {
+    "@datadog/browser-rum": "^5.13.0",
     "@fullcalendar/core": "^6.1.8",
     "@fullcalendar/daygrid": "^6.1.8",
     "@fullcalendar/interaction": "^6.1.8",
@@ -27,7 +28,8 @@
   "scripts": {
     "start": "env-cmd -f .env.production react-scripts start",
     "start:stg": "env-cmd -f .env.staging react-scripts start",
-    "start:dev": "env-cmd -f .env.development react-scripts start",
+    "start:dev:move": "env-cmd -f .env.development.move react-scripts start",
+    "start:dev:reo": "env-cmd -f .env.development.reo react-scripts start",
     "build": "env-cmd -f .env.production react-scripts build",
     "build:stg": "env-cmd -f .env.staging react-scripts build",
     "test": "react-scripts test",

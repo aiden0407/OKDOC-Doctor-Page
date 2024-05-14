@@ -9,7 +9,7 @@ import { Text } from 'components/Text';
 import { Image } from 'components/Image';
 
 //Api
-import { emailCheckOpen, emailCheckClose, changePassword } from 'apis/Login';
+import { emailCheckOpen, emailCheckClose, resetPassword } from 'apis/Login';
 
 //Assets
 import loginBackgroundImage from 'assets/images/login_background.png';
@@ -28,11 +28,13 @@ function Login() {
   const [verificationCode, setVerificationCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [birth, setBirth] = useState('');
 
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [emailToken, setEmailToken] = useState();
-  const [verificationToken, setVerificationToken] = useState();
+  const [verifiedToken, setVerifiedToken] = useState();
+  const [accessToken, setAccessToken] = useState();
 
 
   useEffect(() => {
@@ -59,7 +61,7 @@ function Login() {
 
     try {
       const response = await emailCheckOpen(email);
-      setEmailToken(response.data.response.message);
+      setVerifiedToken(response.data.response.verified_token);
       setIsEmailSent(true);
       alert('해당 이메일로 인증번호가 발송 되었습니다.');
     } catch (error) {
@@ -74,8 +76,8 @@ function Login() {
     }
 
     try {
-      const response = await emailCheckClose(email, verificationCode, emailToken);
-      setVerificationToken(response.data.response.accessToken);
+      const response = await emailCheckClose(email, verificationCode, verifiedToken);
+      setAccessToken(response.data.response.accessToken);
       setIsEmailVerified(true);
       alert('인증이 완료되었습니다.');
     } catch (error) {
@@ -107,7 +109,7 @@ function Login() {
     }
 
     try {
-      await changePassword(email, newPassword, verificationToken);
+      await resetPassword(accessToken, email, newPassword, name, birth);
       alert('비밀번호가 변경되었습니다.');
       navigate('/');
     } catch (error) {
@@ -124,79 +126,111 @@ function Login() {
           <LogoImage src={loginLogoImage} />
 
           <Text T1 bold marginTop={80}>비밀번호 변경</Text>
-          <Text T5 color={COLOR.GRAY2} marginTop={16} style={{minWidth:320}}>가입하신 아이디(이메일)로 비밀번호를 변경하세요.</Text>
-          <InputWrapper style={{marginTop: '32px'}}>
-            <IconImage src={mailIcon} />
-            <BorderInput
-              disabled={isEmailVerified}
-              type="text"
-              placeholder="이메일 입력"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-              }}
-              style={{paddingRight: 90}}
-            />
-            {
-              (!isEmailVerified) && <LineButton onClick={()=>handleSendEmail()}>
-                <Text T7 color={COLOR.MAIN}>{isEmailSent ? '재전송' : '인증요청'}</Text>
-              </LineButton>
-            }
-          </InputWrapper>
+          <Text T5 color={COLOR.GRAY2} marginTop={16} style={{ minWidth: 320 }}>가입하신 아이디(이메일)로 비밀번호를 변경하세요.</Text>
 
-          <InputWrapper style={{marginTop: '16px'}}>
-            <IconImage src={sendIcon} />
-            <BorderInput
-              disabled={isEmailVerified || !isEmailSent}
-              type="number"
-              placeholder="인증번호 입력"
-              maxLength={6}
-              value={verificationCode}
-              onChange={(event) => {
-                setVerificationCode(event.target.value);
-              }}
-            />
-            {
-              (isEmailSent && !isEmailVerified) && <LineButton onClick={()=>handleCheckVerificationCode()}>
-                <Text T7 color={COLOR.MAIN}>인증확인</Text>
-              </LineButton>
-            }
-          </InputWrapper>
+          {
+            !isEmailVerified
+              ? <>
+                <InputWrapper style={{ marginTop: '32px' }}>
+                  <IconImage src={passwordIcon} />
+                  <BorderInput
+                    type="text"
+                    placeholder="이름"
+                    value={name}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                    }}
+                  />
+                </InputWrapper>
 
-          <InputWrapper style={{marginTop: '16px'}}>
-            <IconImage src={passwordIcon} />
-            <BorderInput
-              disabled={!isEmailVerified}
-              type="password"
-              placeholder="새 비밀번호 입력"
-              value={newPassword}
-              onChange={(event) => {
-                setNewPassword(event.target.value);
-              }}
-            />
-          </InputWrapper>
+                {/* <InputWrapper style={{ marginTop: '16px' }}>
+                  <IconImage src={sendIcon} />
+                  <BorderInput
+                    type="text"
+                    placeholder="생년월일"
+                    value={birth}
+                    onChange={(event) => {
+                      setBirth(event.target.value);
+                    }}
+                  />
+                </InputWrapper> */}
 
-          <InputWrapper style={{marginTop: '16px'}}>
-            <IconImage src={passwordIcon} />
-            <BorderInput
-              disabled={!isEmailVerified}
-              type="password"
-              placeholder="비밀번호 확인"
-              value={confirmPassword}
-              onChange={(event) => {
-                setConfirmPassword(event.target.value);
-              }}
-            />
-          </InputWrapper>
+                <InputWrapper style={{ marginTop: '16px' }}>
+                  <IconImage src={mailIcon} />
+                  <BorderInput
+                    disabled={isEmailVerified}
+                    type="text"
+                    placeholder="이메일 입력"
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                    }}
+                    style={{ paddingRight: 90 }}
+                  />
+                  {
+                    (!isEmailVerified) && <LineButton onClick={() => handleSendEmail()}>
+                      <Text T7 color={COLOR.MAIN}>{isEmailSent ? '재전송' : '인증요청'}</Text>
+                    </LineButton>
+                  }
+                </InputWrapper>
 
-          <LoginButton onClick={() => handleChangePassword()}>
-            <Text T6 color="#FFFFFF">비밀번호 변경</Text>
-          </LoginButton>
+                <InputWrapper style={{ marginTop: '16px' }}>
+                  <IconImage src={sendIcon} />
+                  <BorderInput
+                    disabled={isEmailVerified || !isEmailSent}
+                    type="number"
+                    placeholder="인증번호 입력"
+                    maxLength={6}
+                    value={verificationCode}
+                    onChange={(event) => {
+                      setVerificationCode(event.target.value);
+                    }}
+                  />
+                  {
+                    (isEmailSent && !isEmailVerified) && <LineButton onClick={() => handleCheckVerificationCode()}>
+                      <Text T7 color={COLOR.MAIN}>인증확인</Text>
+                    </LineButton>
+                  }
+                </InputWrapper>
+              </>
+              : <>
+                <InputWrapper style={{ marginTop: '32px' }}>
+                  <IconImage src={passwordIcon} />
+                  <BorderInput
+                    disabled={!isEmailVerified}
+                    type="password"
+                    placeholder="새 비밀번호 입력"
+                    value={newPassword}
+                    onChange={(event) => {
+                      setNewPassword(event.target.value);
+                    }}
+                  />
+                </InputWrapper>
+
+                <InputWrapper style={{ marginTop: '16px' }}>
+                  <IconImage src={passwordIcon} />
+                  <BorderInput
+                    disabled={!isEmailVerified}
+                    type="password"
+                    placeholder="비밀번호 확인"
+                    value={confirmPassword}
+                    onChange={(event) => {
+                      setConfirmPassword(event.target.value);
+                    }}
+                  />
+                </InputWrapper>
+
+                <LoginButton onClick={() => handleChangePassword()}>
+                  <Text T6 color="#FFFFFF">비밀번호 변경</Text>
+                </LoginButton>
+              </>
+          }
+
         </InnerContainer>
       </LoginContainer>
 
       <BackgroundContainer>
-        <Image src={loginBackgroundImage} width="100%" height="100%" style={{minWidth: '960px'}} />
+        <Image src={loginBackgroundImage} width="100%" height="100%" style={{ minWidth: '960px' }} />
       </BackgroundContainer>
     </Container>
   );
@@ -272,14 +306,14 @@ const BorderInput = styled.input`
 
 const IconImage = styled(Image)`
   position: absolute;
-  top: 16px;
+  top: 18px;
   left: 24px;
   width: 24px;
 `
 
 const LineButton = styled.div`
   position: absolute;
-  top: 13px;
+  top: 15px;
   right: 17px;
   width: 60px;
   height: 30px;

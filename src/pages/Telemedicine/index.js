@@ -1,39 +1,58 @@
 //React
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import moment from 'moment';
-import { saveAs } from 'file-saver';
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import styled from "styled-components";
+import moment from "moment";
+import { saveAs } from "file-saver";
 
 //Components
-import { COLOR } from 'design/constant';
-import { Text } from 'components/Text';
-import { Image } from 'components/Image';
-import { Row, Column } from 'components/Flex';
+import { COLOR } from "design/constant";
+import { Text } from "components/Text";
+import { Image } from "components/Image";
+import { Row, Column } from "components/Flex";
 
 //Api
-import { getTreatmentInformation, getTreatmentByPatientId, getTreatmentResults, submitTreatment, findDeases, getInvoiceInformation } from 'apis/Telemedicine';
-import { getBiddingInformation } from 'apis/Schedule';
+import {
+  getTreatmentInformation,
+  getTreatmentByPatientId,
+  getTreatmentResults,
+  getTreatmentDraft,
+  editTreatmentDraft,
+  submitTreatmentDraft,
+  submitTreatment,
+  findDeases,
+  getInvoiceInformation,
+} from "apis/Telemedicine";
+import { getBiddingInformation } from "apis/Schedule";
 
 //Assets
-import folderIcon from 'assets/icons/folder.svg';
-import euljiLogo from 'assets/images/eulji_logo.png';
-// import insungLogo from 'assets/images/insung_logo.png';
+import folderIcon from "assets/icons/folder.svg";
+import euljiLogo from "assets/images/eulji_logo.png";
+import NanumGothicBold from "assets/fonts/NanumGothic-Bold.ttf";
+import NanumGothicRegular from "assets/fonts/NanumGothic-Regular.ttf";
 
 //react-pdf
-import { Page, Text as PdfText, View, Image as PdfImage, Font, Document, StyleSheet, PDFViewer } from '@react-pdf/renderer';
+import {
+  Page,
+  Text as PdfText,
+  View,
+  Image as PdfImage,
+  Font,
+  Document,
+  StyleSheet,
+  PDFViewer,
+} from "@react-pdf/renderer";
 
 function Telemedicine() {
-
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const treatmentId = searchParams.get('id');
-  const localStorageData = JSON.parse(localStorage.getItem('OKDOC_DOCTOR_OPINION')) ?? {};
-  
+  const treatmentId = searchParams.get("id");
+  const sessionToken = sessionStorage.getItem("OKDOC_DOCTOR_TOKEN");
+
   useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem('OKDOC_DOCTOR_INFO');
-    if(sessionStorageData){
+    const sessionStorageData = sessionStorage.getItem("OKDOC_DOCTOR_INFO");
+    if (sessionStorageData) {
       setDoctorInfo(JSON.parse(sessionStorageData));
     }
   }, []);
@@ -45,28 +64,30 @@ function Telemedicine() {
   const [consultingData, setConsultingData] = useState([]);
   const [isDiagnosisOpend, setIsDiagnosisOpend] = useState(false);
 
-  const [CC, setCC] = useState(localStorageData?.[treatmentId]?.chief_complaint);
-  const [subjectiveSymtoms, setSubjectiveSymtoms] = useState(localStorageData?.[treatmentId]?.subjective_symptom ?? '');
-  const [objectiveFindings, setObjectiveFindings] = useState(localStorageData?.[treatmentId]?.objective_finding ?? '');
-  const [diagnosis, setDiagnosis] = useState(localStorageData?.[treatmentId]?.diagnosis ?? '');
-  const [diagnosisType, setDiagnosisType] = useState(localStorageData?.[treatmentId]?.diagnosis_type ?? 'presumptive');
-  const [diagnosisCode, setDiagnosisCode] = useState(localStorageData?.[treatmentId]?.diagnosis_code ?? '');
-  const [diagnosisId, setDiagnosisId] = useState(localStorageData?.[treatmentId]?.disease_id ?? '');
+  const [CC, setCC] = useState();
+  const [subjectiveSymtoms, setSubjectiveSymtoms] = useState();
+  const [objectiveFindings, setObjectiveFindings] = useState();
+  const [diagnosis, setDiagnosis] = useState();
+  const [diagnosisType, setDiagnosisType] = useState("presumptive");
+  const [diagnosisCode, setDiagnosisCode] = useState();
+  const [diagnosisId, setDiagnosisId] = useState();
   const [diagnosisList, setDiagnosisList] = useState([]);
   const [isDiagnosisListOpen, setIsDiagnosisListOpen] = useState(false);
-  const [assessment, setAssessment] = useState(localStorageData?.[treatmentId]?.assessment ?? '');
-  const [plan, setPlan] = useState(localStorageData?.[treatmentId]?.plan ?? '');
-  const [medicalOpinion, setMedicalOpinion] = useState(localStorageData?.[treatmentId]?.medical_opinion ?? '');
-  const [memoContext, setMemoContext] = useState(localStorageData?.[treatmentId]?.memo_context ?? '');
+  const [assessment, setAssessment] = useState();
+  const [plan, setPlan] = useState();
+  const [medicalOpinion, setMedicalOpinion] = useState();
+  const [memoContext, setMemoContext] = useState();
 
   const [isFinishButtonHovered, setIsFinishButtonHovered] = useState(false);
   const [meetingUrl, setMeetingUrl] = useState();
 
   useEffect(() => {
-    if(treatmentData?.hospital_treatment_room?.start_time){
-      const endTime = moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes');
+    if (treatmentData?.hospital_treatment_room?.start_time) {
+      const endTime = moment(
+        treatmentData?.hospital_treatment_room?.start_time
+      ).add(15, "minutes");
       const currentTime = moment();
-      if(currentTime.isBefore(endTime)){
+      if (currentTime.isBefore(endTime)) {
         startCapture();
       }
     }
@@ -80,33 +101,44 @@ function Telemedicine() {
 
   const initData = async function () {
     try {
-      const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
       const response = await getTreatmentInformation(sessionToken, treatmentId);
       let treatmentInformation = response.data.response;
 
       try {
-        const biddingResponse = await getBiddingInformation(sessionToken, treatmentInformation.bidding_id);
+        const biddingResponse = await getBiddingInformation(
+          sessionToken,
+          treatmentInformation.bidding_id
+        );
         treatmentInformation.biddingData = biddingResponse.data.response;
       } catch (error) {
-        alert('네트워크 오류로 인해 진료 정보를 불러오지 못했습니다.');
+        alert("네트워크 오류로 인해 진료 정보를 불러오지 못했습니다.");
       }
 
       let endTime;
 
       try {
-        const invoiceResponse = await getInvoiceInformation(sessionToken, treatmentInformation.bidding_id);
+        const invoiceResponse = await getInvoiceInformation(
+          sessionToken,
+          treatmentInformation.bidding_id
+        );
         treatmentInformation.invoiceData = invoiceResponse.data.response;
-        endTime = moment(treatmentInformation?.hospital_treatment_room?.start_time).add(15, 'minutes')
+        endTime = moment(
+          treatmentInformation?.hospital_treatment_room?.start_time
+        ).add(15, "minutes");
       } catch (error) {
         // 인보이스 없음
-        endTime = moment(treatmentInformation?.hospital_treatment_room?.start_time).add(10, 'minutes')
+        endTime = moment(
+          treatmentInformation?.hospital_treatment_room?.start_time
+        ).add(10, "minutes");
       }
 
       if (moment().isBefore(endTime)) {
         const meetingNumber = treatmentInformation?.hospital_treatment_room?.id;
         const userName = treatmentInformation?.doctor?.name;
         const wishAt = treatmentInformation?.biddingData?.wish_at;
-        setMeetingUrl(`${process.env.REACT_APP_ZOOM_HOST}/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 의사&wishAt=${wishAt}`);
+        setMeetingUrl(
+          `${process.env.REACT_APP_ZOOM_HOST}/meeting/doctor/?meetingNumber=${meetingNumber}&userName=${userName} 교수&wishAt=${wishAt}&email=${treatmentInformation.doctor.email}`
+        );
       } else {
         setMeetingUrl(`${process.env.REACT_APP_ZOOM_HOST}/meeting/doctor/end/`);
       }
@@ -114,27 +146,63 @@ function Telemedicine() {
       setTreatmentData(treatmentInformation);
 
       try {
-        const historyResponse = await getTreatmentByPatientId(sessionToken, treatmentInformation.patient.id);
+        const historyResponse = await getTreatmentByPatientId(
+          sessionToken,
+          treatmentInformation.patient.id
+        );
         const treatmentHistory = historyResponse.data.response;
-
         for (let ii = 0; ii < treatmentHistory.length; ii++) {
           try {
-            const treatmentResponse = await getTreatmentResults(sessionToken, treatmentHistory[ii].id);
-            treatmentHistory[ii].treatmentData = treatmentResponse.data.response[0];
+            const treatmentResponse = await getTreatmentResults(
+              sessionToken,
+              treatmentHistory[ii].id
+            );
+            treatmentHistory[ii].treatmentData =
+              treatmentResponse.data.response[0];
           } catch (error) {
-            //alert('네트워크 오류로 인해 이전 진료 정보를 불러오지 못했습니다.');
+            // 다른 의사 treatment 조회 불가
           }
         }
-
         setConsultingData(treatmentHistory);
       } catch (error) {
-        alert('네트워크 오류로 인해 진료 내역을 불러오지 못했습니다.');
+        alert("네트워크 오류로 인해 진료 내역을 불러오지 못했습니다.");
       }
 
+      // 초안 조회
+      try {
+        const response = await getTreatmentDraft(sessionToken);
+        const draftData = response.data.response.find(
+          (draft) => draft.treatment_appointment.id === treatmentId
+        );
+        setCC(draftData?.chief_complaint ?? "");
+        setSubjectiveSymtoms(draftData?.subjective_symptom ?? "");
+        setObjectiveFindings(draftData?.objective_finding ?? "");
+        setDiagnosisType(draftData?.diagnosis_type ?? "presumptive");
+        setAssessment(draftData?.assessment ?? "");
+        setPlan(draftData?.plan ?? "");
+        setMedicalOpinion(draftData?.medical_opinion ?? "");
+        setMemoContext(draftData?.memo ?? "");
+        if (draftData?.diseases) {
+          const draftDiagnosis = draftData?.diseases
+            .map((disease) => disease["한글명"])
+            .join(", ");
+          setDiagnosis(draftDiagnosis);
+          const draftDiagnosisCode = draftData?.diseases
+            .map((disease) => disease["상병기호"])
+            .join(", ");
+          setDiagnosisCode(draftDiagnosisCode);
+          const draftDiagnosisId = draftData?.diseases
+            .map((disease) => disease["_id"])
+            .join(", ");
+          setDiagnosisId(draftDiagnosisId);
+        }
+      } catch (error) {
+        alert(error.data.message);
+      }
     } catch (error) {
-      alert('네트워크 오류로 인해 환자 정보를 불러오지 못했습니다.');
+      // console.log(error)
     }
-  }
+  };
 
   let isRecording = false;
 
@@ -146,9 +214,17 @@ function Telemedicine() {
 
     let chunks = [];
     try {
-      const videoStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" }, audio: true });
-      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const tracks = [...videoStream.getTracks(), ...audioStream.getAudioTracks()];
+      const videoStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: "always" },
+        audio: true,
+      });
+      const audioStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      const tracks = [
+        ...videoStream.getTracks(),
+        ...audioStream.getAudioTracks(),
+      ];
       const combinedStream = new MediaStream(tracks);
       const recorder = new MediaRecorder(combinedStream);
 
@@ -157,10 +233,10 @@ function Telemedicine() {
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { 'type': 'video/mp4' });
+        const blob = new Blob(chunks, { type: "video/mp4" });
         chunks = [];
         const videoURL = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = videoURL;
         link.download = `${treatmentId}.mp4`;
         link.click();
@@ -168,7 +244,6 @@ function Telemedicine() {
 
       setMediaRecorder(recorder);
       recorder.start();
-
     } catch (err) {
       console.error("Error: " + err);
     }
@@ -188,11 +263,10 @@ function Telemedicine() {
   }
 
   const handleImageDownload = (file) => {
-    console.log(file)
     fetch(file.Location)
       .then((response) => {
         if (!response.ok) {
-          throw new Error('파일을 다운로드할 수 없습니다.');
+          throw new Error("파일을 다운로드할 수 없습니다.");
         }
         return response.blob();
       })
@@ -201,7 +275,7 @@ function Telemedicine() {
         saveAs(blob, file.key);
       })
       .catch((error) => {
-        console.error('다운로드 오류:', error);
+        console.error("다운로드 오류:", error);
       });
   };
 
@@ -210,9 +284,9 @@ function Telemedicine() {
     setDiagnosis(searchText);
 
     if (searchText) {
-      const searchTerms = searchText.split(','); // 쉼표로 분리
+      const searchTerms = searchText.split(","); // 쉼표로 분리
       const lastSearchTerm = searchTerms[searchTerms.length - 1].trim(); // 마지막 검색어 추출 (공백 제거)
-  
+
       if (lastSearchTerm) {
         try {
           const response = await findDeases(lastSearchTerm); // 마지막 검색어로 검색
@@ -229,87 +303,135 @@ function Telemedicine() {
     } else {
       setDiagnosisList([]);
       setIsDiagnosisListOpen(false);
-      setDiagnosisCode('');
-      setDiagnosisId('');
+      setDiagnosisCode("");
+      setDiagnosisId("");
     }
   };
 
   const handleTemporarySave = async function () {
     const confirm1 = window.confirm("진료 영상을 제출하셨습니까?");
     if (confirm1) {
-      localStorageData[treatmentId] = {
-        "chief_complaint": CC,
-        "subjective_symptom": subjectiveSymtoms,
-        "objective_finding": objectiveFindings,
-        "diagnosis": diagnosis,
-        "diagnosis_code": diagnosisCode,
-        "diagnosis_type": diagnosisType,
-        "disease_id": diagnosisId,
-        "assessment": assessment,
-        "plan": plan,
-        "medical_opinion": medicalOpinion
+      const data = {
+        chief_complaint: CC,
+        subjective_symptom: subjectiveSymtoms,
+        objective_finding: objectiveFindings,
+        diagnosis_type: diagnosisType,
+        assessment: assessment,
+        plan: plan,
+        medical_opinion: medicalOpinion,
+        memo: memoContext,
       };
-      localStorage.setItem('OKDOC_DOCTOR_OPINION', JSON.stringify(localStorageData));
+      if (diagnosisId) {
+        data.diseases = diagnosisId.split(", ");
+      }
 
-      const confirm2 = window.confirm("임시 저장이 완료되었습니다.\n현재 페이지를 나가시겠습니까?");
-      if (confirm2) {
-        navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+      try {
+        await submitTreatmentDraft(sessionToken, treatmentData.id, data);
+        const confirm2 = window.confirm(
+          "임시 저장이 완료되었습니다.\n현재 페이지를 나가시겠습니까?"
+        );
+        if (confirm2) {
+          navigate(`/calendar/detail?id=${treatmentData.patient.id}`);
+        }
+      } catch (error) {
+        if (error.data.statusCode === 409) {
+          // 이미 초안이 존재하는 경우 우선 초안 목록 조회
+          try {
+            const response = await getTreatmentDraft(sessionToken);
+            const treatmentDraftsList = response.data.response;
+            const draftData = treatmentDraftsList.find(
+              (draft) => draft.treatment_appointment.id === treatmentId
+            );
+
+            // 초안 id로 초안 수정
+            try {
+              await editTreatmentDraft(sessionToken, draftData.id, data);
+              const confirm2 = window.confirm(
+                "임시 저장이 완료되었습니다.\n현재 페이지를 나가시겠습니까?"
+              );
+              if (confirm2) {
+                navigate(`/calendar/detail?id=${treatmentData.patient.id}`);
+              }
+            } catch (error) {
+              alert(error.data.message);
+            }
+          } catch (error) {
+            alert(error.data.message);
+          }
+        } else {
+          alert(error.data.message);
+        }
       }
     } else {
-      alert('진료 영상을 먼저 제출해주시기 바랍니다.');
+      alert("진료 영상을 먼저 제출해주시기 바랍니다.");
     }
-
-    
-  }
+  };
 
   const handleTreatmentSubmit = async function () {
     const confirm1 = window.confirm("진료 영상을 제출하셨습니까?");
     if (confirm1) {
-      if (!CC?.length || !subjectiveSymtoms?.length || !subjectiveSymtoms?.length || !objectiveFindings?.length || !diagnosisCode?.length || !diagnosisType || !assessment?.length || !plan?.length || !medicalOpinion?.length) {
-        alert('MD 노트에 작성하지 않은 필드가 존재합니다.');
+      if (
+        !CC?.length ||
+        !subjectiveSymtoms?.length ||
+        !subjectiveSymtoms?.length ||
+        !objectiveFindings?.length ||
+        !diagnosisCode?.length ||
+        !diagnosisType ||
+        !assessment?.length ||
+        !plan?.length ||
+        !medicalOpinion?.length
+      ) {
+        alert("MD 노트에 작성하지 않은 필드가 존재합니다.");
         return;
       }
 
-      const confirm2 = window.confirm("소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다.");
+      const confirm2 = window.confirm(
+        "소견서를 제출하시겠습니까?\n제출하면 다시 수정할 수 없습니다."
+      );
       if (confirm2) {
-        const sessionToken = sessionStorage.getItem('OKDOC_DOCTOR_TOKEN');
         const data = {
-          "chief_complaint": CC,
-          "subjective_symptom": subjectiveSymtoms,
-          "objective_finding": objectiveFindings,
-          "diseases": diagnosisId.split(', '),
-          "diagnosis_type": diagnosisType,
-          "assessment": assessment,
-          "plan": plan,
-          "medical_opinion": medicalOpinion
-        }
-  
+          chief_complaint: CC,
+          subjective_symptom: subjectiveSymtoms,
+          objective_finding: objectiveFindings,
+          diseases: diagnosisId.split(", "),
+          diagnosis_type: diagnosisType,
+          assessment: assessment,
+          plan: plan,
+          medical_opinion: medicalOpinion,
+        };
+
         try {
           await submitTreatment(sessionToken, treatmentData.id, data);
-          navigate(`/calendar/detail?id=${treatmentData.patient.id}`)
+          navigate(`/calendar/detail?id=${treatmentData.patient.id}`);
         } catch (error) {
           alert(error.data.message);
         }
       }
     } else {
-      alert('진료 영상을 먼저 제출해주시기 바랍니다.');
+      alert("진료 영상을 먼저 제출해주시기 바랍니다.");
     }
-  }
+  };
 
   function returnToday() {
     const currentDate = new Date();
     const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 해줍니다.
-    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 +1 해줍니다.
+    const day = String(currentDate.getDate()).padStart(2, "0");
     return `${year}년 ${month}월 ${day}일`;
   }
 
   function genderSelector(patientData) {
-    if(patientData?.gender === 'MALE' || patientData?.passapp_certification?.gender === 'male'){
-      return '남성';
+    if (
+      patientData?.gender === "MALE" ||
+      patientData?.passapp_certification?.gender === "male"
+    ) {
+      return "남성";
     }
-    if(patientData?.gender === 'FEMALE' || patientData?.passapp_certification?.gender === 'female'){
-      return '여성';
+    if (
+      patientData?.gender === "FEMALE" ||
+      patientData?.passapp_certification?.gender === "female"
+    ) {
+      return "여성";
     }
     return null;
   }
@@ -317,16 +439,7 @@ function Telemedicine() {
   const MyDocument = () => (
     <Document>
       <Page size="A4" style={styles.page}>
-
         <PdfImage src={euljiLogo} style={styles.waterMark} />
-        {/* <PdfText style={styles.waterMark1}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark2}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark3}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark4}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark5}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark6}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark7}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText>
-        <PdfText style={styles.waterMark8}>본 소견서는 OKDOC 어플리케이션을 통해 작성되었으며 무단 수정 및 복제를 금지합니다.</PdfText> */}
 
         <PdfText style={styles.main}>소견서</PdfText>
 
@@ -335,13 +448,23 @@ function Telemedicine() {
             <PdfText style={styles.title}>환자의 성명</PdfText>
           </View>
           <View style={styles.contentBox1}>
-            <PdfText style={styles.content}>{treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}</PdfText>
+            <PdfText style={styles.content}>
+              {treatmentData?.patient?.passport?.user_name ??
+                treatmentData?.patient?.passapp_certification?.name}
+            </PdfText>
           </View>
           <View style={styles.titleBox1}>
             <PdfText style={styles.title}>환자 생년월일</PdfText>
           </View>
           <View style={styles.contentBox1}>
-            <PdfText style={styles.content}>{treatmentData?.patient?.passport ? formatDate(String(treatmentData?.patient?.passport?.birth)) : treatmentData?.patient?.passapp_certification?.birthday.replaceAll('-', '.')}</PdfText>
+            <PdfText style={styles.content}>
+              {treatmentData?.patient?.passport
+                ? formatDate(String(treatmentData?.patient?.passport?.birth))
+                : treatmentData?.patient?.passapp_certification?.birthday.replaceAll(
+                    "-",
+                    "."
+                  )}
+            </PdfText>
           </View>
         </View>
 
@@ -349,8 +472,14 @@ function Telemedicine() {
           <View style={styles.titleBox2}>
             <PdfText style={styles.title}>병명</PdfText>
             <View style={styles.column1}>
-              <PdfText style={styles.content}>{diagnosisType === 'presumptive' ? '◉ 임상적 추정' : '○ 임상적 추정'}</PdfText>
-              <PdfText style={styles.content}>{diagnosisType === 'definitive' ? '◉ 최종 진단' : '○ 최종 진단'}</PdfText>
+              <PdfText style={styles.content}>
+                {diagnosisType === "presumptive"
+                  ? "◉ 임상적 추정"
+                  : "○ 임상적 추정"}
+              </PdfText>
+              <PdfText style={styles.content}>
+                {diagnosisType === "definitive" ? "◉ 최종 진단" : "○ 최종 진단"}
+              </PdfText>
             </View>
           </View>
           <View style={styles.contentBox2}>
@@ -366,7 +495,9 @@ function Telemedicine() {
 
         <View style={styles.row2}>
           <View style={styles.titleBox3}>
-            <PdfText style={styles.title}>진료 내용 및{'\n'}향후 치료에 대한{'\n'}소견</PdfText>
+            <PdfText style={styles.title}>
+              진료 내용 및{"\n"}향후 치료에 대한{"\n"}소견
+            </PdfText>
           </View>
           <View style={styles.contentBox3}>
             <View style={styles.column2}>
@@ -374,18 +505,18 @@ function Telemedicine() {
               <PdfText style={styles.content}>{CC}</PdfText>
               <PdfText style={styles.content}>{subjectiveSymtoms}</PdfText>
             </View>
-            
+
             <View style={styles.column2}>
               <PdfText style={styles.title}>(본 의사의 판단)</PdfText>
               <PdfText style={styles.content}>{objectiveFindings}</PdfText>
               <PdfText style={styles.content}>{assessment}</PdfText>
             </View>
-            
+
             <View style={styles.column2}>
               <PdfText style={styles.title}>(치료 계획)</PdfText>
               <PdfText style={styles.content}>{plan}</PdfText>
             </View>
-            
+
             <View style={styles.column2}>
               <PdfText style={styles.title}>(본 의사의 소견)</PdfText>
               <PdfText style={styles.content}>{medicalOpinion}</PdfText>
@@ -394,373 +525,429 @@ function Telemedicine() {
         </View>
 
         <View style={styles.contentBox4}>
-          <PdfText style={styles.content}>상기 진료는 ㈜인성정보의 OK DOC 플랫폼을 통한 원격진료로 진행되었으며, 위와 같이 소견합니다.</PdfText>
+          <PdfText style={styles.content}>
+            상기 진료는 ㈜인성정보의 OK DOC 플랫폼을 통한 원격진료로
+            진행되었으며, 위와 같이 소견합니다.
+          </PdfText>
           <View style={styles.row3}>
             <PdfText style={styles.content}>{returnToday()}</PdfText>
           </View>
           <View style={styles.row4}>
-            <PdfText style={styles.content}>의료기관 명칭 : 의정부을지대학교병원</PdfText>
+            <PdfText style={styles.content}>
+              의료기관 명칭 : 의정부을지대학교병원
+            </PdfText>
             <PdfText style={styles.content}> </PdfText>
-            <PdfText style={styles.content}>주소 : 경기도 의정부시 동일로 712 (금오동)</PdfText>
+            <PdfText style={styles.content}>
+              주소 : 경기도 의정부시 동일로 712 (금오동)
+            </PdfText>
             <PdfText style={styles.content}> </PdfText>
             <PdfText style={styles.content}> </PdfText>
             <PdfText style={styles.content}> </PdfText>
-            <PdfText style={styles.content}>[○]의사 [ ]치과의사 [ ]한의사 면허번호 : 제 {treatmentData?.doctor?.id} 호</PdfText>
+            <PdfText style={styles.content}>
+              [○]의사 [ ]치과의사 [ ]한의사 면허번호 : 제{" "}
+              {treatmentData?.doctor?.id} 호
+            </PdfText>
             <PdfText style={styles.content}> </PdfText>
-            <PdfText style={styles.content}>성명:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{treatmentData?.doctor?.name}</PdfText>
+            <PdfText style={styles.content}>
+              성명:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              {treatmentData?.doctor?.name}
+            </PdfText>
           </View>
         </View>
-
       </Page>
     </Document>
   );
-
-  Font.register({ family: "Nanum Gothic Regular", src: "https://fonts.gstatic.com/ea/nanumgothic/v5/NanumGothic-Regular.ttf", });
-  Font.register({ family: "Nanum Gothic Bold", src: "https://fonts.gstatic.com/ea/nanumgothic/v5/NanumGothic-Bold.ttf", });
+  Font.register({
+    family: "Nanum Gothic Regular",
+    src: NanumGothicRegular,
+  });
+  Font.register({
+    family: "Nanum Gothic Bold",
+    src: NanumGothicBold,
+  });
 
   const styles = StyleSheet.create({
     viewer: {
-      position: 'absolute',
-      width: '40%',
-      height: '80%',
+      position: "absolute",
+      width: "40%",
+      height: "80%",
       top: 0,
-      right: 0
+      right: 0,
     },
     page: {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '25px 40px',
-      fontFamily: 'Nanum Gothic Regular'
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "25px 40px",
+      fontFamily: "Nanum Gothic Regular",
     },
     waterMark: {
-      position: 'absolute',
+      position: "absolute",
       top: 260,
       left: 165,
       width: 300,
-      opacity: 0.2
+      opacity: 0.2,
     },
-    // waterMark1: {
-    //   position: 'absolute',
-    //   top: -50,
-    //   left: 50,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark2: {
-    //   position: 'absolute',
-    //   top: 250,
-    //   left: -50,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark3: {
-    //   position: 'absolute',
-    //   top: 550,
-    //   left: -150,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark4: {
-    //   position: 'absolute',
-    //   top: 150,
-    //   left: 250,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark5: {
-    //   position: 'absolute',
-    //   top: 450,
-    //   left: 150,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark6: {
-    //   position: 'absolute',
-    //   top: 750,
-    //   left: 50,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark7: {
-    //   position: 'absolute',
-    //   top: 350,
-    //   left: 450,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
-    // waterMark8: {
-    //   position: 'absolute',
-    //   top: 650,
-    //   left: 350,
-    //   fontFamily: 'Nanum Gothic Regular',
-    //   fontSize: 11,
-    //   color: '#EEE',
-    //   transform: 'rotate(-45deg)',
-    // },
     main: {
-      fontFamily: 'Nanum Gothic Bold',
-      fontSize: 20
+      fontFamily: "Nanum Gothic Bold",
+      fontSize: 20,
     },
     title: {
-      fontFamily: 'Nanum Gothic Bold',
+      fontFamily: "Nanum Gothic Bold",
       fontSize: 11,
-      textAlign: 'center'
+      textAlign: "center",
     },
     content: {
-      fontSize: 11
+      fontSize: 11,
     },
     row1: {
       marginTop: 30,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'row',
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
     },
     titleBox1: {
       minWidth: 80,
       height: 24,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '1px solid #7A7A7A',
-      backgroundColor: '#F0F0F0',
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      border: "1px solid #7A7A7A",
+      backgroundColor: "#F0F0F0",
     },
     contentBox1: {
-      width: '100%',
+      width: "100%",
       height: 24,
-      padding: '0 0 0 10px',
-      display: 'flex',
-      justifyContent: 'center',
-      border: '1px solid #7A7A7A',
+      padding: "0 0 0 10px",
+      display: "flex",
+      justifyContent: "center",
+      border: "1px solid #7A7A7A",
     },
     row2: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'row',
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
     },
     column1: {
       marginTop: 4,
       marginLeft: 8,
-      width: '100%',
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 4
+      width: "100%",
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 4,
     },
     titleBox2: {
       minWidth: 80,
       height: 75,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '1px solid #7A7A7A',
-      backgroundColor: '#F0F0F0',
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      border: "1px solid #7A7A7A",
+      backgroundColor: "#F0F0F0",
     },
     contentBox2: {
-      width: '100%',
+      width: "100%",
       height: 75,
-      padding: '0 0 0 10px',
-      display: 'flex',
-      justifyContent: 'center',
-      border: '1px solid #7A7A7A',
+      padding: "0 0 0 10px",
+      display: "flex",
+      justifyContent: "center",
+      border: "1px solid #7A7A7A",
     },
     titleBox3: {
       minWidth: 80,
       height: 460,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: '1px solid #7A7A7A',
-      backgroundColor: '#F0F0F0',
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      border: "1px solid #7A7A7A",
+      backgroundColor: "#F0F0F0",
     },
     contentBox3: {
-      width: '100%',
+      width: "100%",
       height: 460,
-      padding: '10px 0 60px 10px',
-      display: 'flex',
-      border: '1px solid #7A7A7A',
-      justifyContent: 'space-between',
+      padding: "10px 0 60px 10px",
+      display: "flex",
+      border: "1px solid #7A7A7A",
+      justifyContent: "space-between",
     },
     column2: {
-      width: '100%',
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: 4
+      width: "100%",
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 4,
     },
     contentBox4: {
-      width: '100%',
+      width: "100%",
       height: 170,
-      padding: '10px 30px 30px 10px',
-      display: 'flex',
-      border: '1px solid #7A7A7A',
+      padding: "10px 30px 30px 10px",
+      display: "flex",
+      border: "1px solid #7A7A7A",
     },
     row3: {
       marginTop: 10,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
+      width: "100%",
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "flex-end",
     },
     row4: {
-      padding: '30px 0 0 30px',
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
+      padding: "30px 0 0 30px",
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
     },
   });
 
   return (
     <TelemedicineContainer>
-      {
-        isDiagnosisOpend && <PDFViewer style={styles.viewer}>
+      {isDiagnosisOpend && (
+        <PDFViewer style={styles.viewer}>
           <MyDocument />
         </PDFViewer>
-      }
+      )}
 
       <TelemedicineSector1>
         <TelemedicineTitleBox>
-          <Text T6 bold color="#565965">진료 예약 일자</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY-MM-DD // HH:mm')}</Text>
-          <Text T6 bold color="#565965">진료 종료 예정 시간</Text>
-          <Text T6 color="#565965">{moment(treatmentData?.hospital_treatment_room?.start_time).format('HH:mm')} ~ {moment(treatmentData?.hospital_treatment_room?.start_time).add(15, 'minutes').format('HH:mm')}</Text>
+          <Text T6 bold color="#565965">
+            진료 예약 일자
+          </Text>
+          <Text T6 color="#565965">
+            {moment(treatmentData?.hospital_treatment_room?.start_time).format(
+              "YYYY-MM-DD // HH:mm"
+            )}
+          </Text>
+          <Text T6 bold color="#565965">
+            진료 종료 예정 시간
+          </Text>
+          <Text T6 color="#565965">
+            {moment(treatmentData?.hospital_treatment_room?.start_time).format(
+              "HH:mm"
+            )}{" "}
+            ~{" "}
+            {moment(treatmentData?.hospital_treatment_room?.start_time)
+              .add(15, "minutes")
+              .format("HH:mm")}
+          </Text>
         </TelemedicineTitleBox>
 
-        <Iframe src={meetingUrl} sandbox="allow-same-origin allow-scripts allow-modals" allow="camera; microphone" />
+        <Iframe
+          src={meetingUrl}
+          sandbox="allow-same-origin allow-scripts allow-modals"
+          allow="camera; microphone"
+        />
       </TelemedicineSector1>
 
       <TelemedicineSector2>
         <InfoBox33>
-          <Text T4 bold>Personal Information</Text>
+          <Text T4 bold>
+            Personal Information
+          </Text>
           <Row marginTop={10}>
             <ContentsTitle>
-              <Text T5 bold>이름</Text>
+              <Text T5 bold>
+                이름
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.passport?.user_name ??
+                  treatmentData?.patient?.passapp_certification?.name}
+              </Text>
             </ContentsText>
           </Row>
           <Row>
             <ContentsTitle>
-              <Text T5 bold>성별</Text>
+              <Text T5 bold>
+                성별
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{genderSelector(treatmentData?.patient)}</Text>
+              <Text T5 medium>
+                {genderSelector(treatmentData?.patient)}
+              </Text>
             </ContentsText>
           </Row>
           <Row>
             <ContentsTitle>
-              <Text T5 bold>생년월일</Text>
+              <Text T5 bold>
+                생년월일
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.passport ? formatDate(String(treatmentData?.patient?.passport?.birth)) : treatmentData?.patient?.passapp_certification?.birthday.replaceAll('-', '.')}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.passport
+                  ? formatDate(String(treatmentData?.patient?.passport?.birth))
+                  : treatmentData?.patient?.passapp_certification?.birthday.replaceAll(
+                      "-",
+                      "."
+                    )}
+              </Text>
             </ContentsText>
           </Row>
         </InfoBox33>
         <InfoBox33>
-          <Text T4 bold>Present Conditions</Text>
-          <Text T5 marginTop={4}>{treatmentData?.biddingData?.explain_symptom}</Text>
+          <Text T4 bold>
+            Present Conditions
+          </Text>
+          <Text T5 marginTop={4}>
+            {treatmentData?.biddingData?.explain_symptom}
+          </Text>
         </InfoBox33>
         <InfoBox10>
-          <Text T4 bold>Files</Text>
-          {
-            treatmentData?.biddingData?.attachments[0]
-            ?<Image src={folderIcon} width={25} style={{ cursor: 'pointer' }} onClick={() => {
-              handleImageDownload(treatmentData.biddingData.attachments[0])
-            }} />
-            :<Text T6 color={COLOR.GRAY0}>첨부 파일 없음</Text>
-          }
+          <Text T4 bold>
+            Files
+          </Text>
+          {treatmentData?.biddingData?.attachments[0] ? (
+            <Image
+              src={folderIcon}
+              width={25}
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                handleImageDownload(treatmentData.biddingData.attachments[0]);
+              }}
+            />
+          ) : (
+            <Text T6 color={COLOR.GRAY0}>
+              첨부 파일 없음
+            </Text>
+          )}
         </InfoBox10>
         <InfoBox33>
-          <Text T4 bold>Consulting</Text>
-          {
-            consultingData?.map((item, index) => {
-              if(item?.treatmentData){
-                return (
-                  <Text T5 marginTop={3} key={index}>· {moment(item?.hospital_treatment_room?.start_time).format('YY-MM-DD')} / {item?.doctor?.department_name} / {item?.treatmentData?.diseases?.[0]?.한글명}</Text>
-                )
-              }
-            })
-          }
+          <Text T4 bold>
+            Consulting
+          </Text>
+          {consultingData?.map((item, index) => {
+            if (item?.treatmentData) {
+              return (
+                <Text T5 marginTop={3} key={index}>
+                  ·{" "}
+                  {moment(item?.hospital_treatment_room?.start_time).format(
+                    "YY-MM-DD"
+                  )}{" "}
+                  / {item?.doctor?.department_name} /{" "}
+                  {item?.treatmentData?.diseases?.[0]?.한글명}
+                </Text>
+              );
+            }
+          })}
         </InfoBox33>
         <InfoBox61>
-        <Text T4 bold>Personal Information</Text>
+          <Text T4 bold>
+            Personal Information
+          </Text>
           <Row marginTop={10}>
             <ContentsTitle>
-              <Text T5 bold>신장 / 체중</Text>
+              <Text T5 bold>
+                신장 / 체중
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.height}cm / {treatmentData?.patient?.weight}kg</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.height}cm /{" "}
+                {treatmentData?.patient?.weight}kg
+              </Text>
             </ContentsText>
           </Row>
           <Row>
             <ContentsTitle>
-              <Text T5 bold>음주 여부</Text>
+              <Text T5 bold>
+                음주 여부
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.drinker === 'FREQUENTLY' ? '자주' : treatmentData?.patient?.drinker === 'SOMETIMES' ? '가끔' : '안함'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.drinker === "FREQUENTLY"
+                  ? "자주"
+                  : treatmentData?.patient?.drinker === "SOMETIMES"
+                  ? "가끔"
+                  : "안함"}
+              </Text>
             </ContentsText>
           </Row>
           <Row>
             <ContentsTitle>
-              <Text T5 bold>흡연 여부</Text>
+              <Text T5 bold>
+                흡연 여부
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.drinker === 'smoker' ? '흡연' : '비흡연'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.drinker === "smoker"
+                  ? "흡연"
+                  : "비흡연"}
+              </Text>
             </ContentsText>
           </Row>
           <StyledRow>
             <ContentsTitle>
-              <Text T5 bold>본인 병력</Text>
+              <Text T5 bold>
+                본인 병력
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.medical_history?.length ? treatmentData?.patient?.medical_history : '없음'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.medical_history?.length
+                  ? treatmentData?.patient?.medical_history
+                  : "없음"}
+              </Text>
             </ContentsText>
           </StyledRow>
           <StyledRow>
             <ContentsTitle>
-              <Text T5 bold>가족 병력</Text>
+              <Text T5 bold>
+                가족 병력
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.family_medical_history?.length ? treatmentData?.patient?.family_medical_history : '없음'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.family_medical_history?.length
+                  ? treatmentData?.patient?.family_medical_history
+                  : "없음"}
+              </Text>
             </ContentsText>
           </StyledRow>
           <StyledRow>
             <ContentsTitle>
-              <Text T5 bold>복용 중인 약</Text>
+              <Text T5 bold>
+                복용 중인 약
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.medication?.length ? treatmentData?.patient?.medication : '없음'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.medication?.length
+                  ? treatmentData?.patient?.medication
+                  : "없음"}
+              </Text>
             </ContentsText>
           </StyledRow>
           <StyledRow>
             <ContentsTitle>
-              <Text T5 bold>알러지 반응</Text>
+              <Text T5 bold>
+                알러지 반응
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.allergic_reaction?.length ? treatmentData?.patient?.allergic_reaction : '없음'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.allergic_reaction?.length
+                  ? treatmentData?.patient?.allergic_reaction
+                  : "없음"}
+              </Text>
             </ContentsText>
           </StyledRow>
           <StyledRow>
             <ContentsTitle>
-              <Text T5 bold>기타 사항</Text>
+              <Text T5 bold>
+                기타 사항
+              </Text>
             </ContentsTitle>
             <ContentsText>
-              <Text T5 medium>{treatmentData?.patient?.consideration?.length ? treatmentData?.patient?.consideration : '없음'}</Text>
+              <Text T5 medium>
+                {treatmentData?.patient?.consideration?.length
+                  ? treatmentData?.patient?.consideration
+                  : "없음"}
+              </Text>
             </ContentsText>
           </StyledRow>
         </InfoBox61>
@@ -768,11 +955,15 @@ function Telemedicine() {
 
       <TelemedicineSector2>
         <MDBox>
-          <Text T4 bold>Doctor MD note</Text>
+          <Text T4 bold>
+            Doctor MD note
+          </Text>
 
           <Section marginTop={11}>
             <Title>
-              <Text T6 bold>C.C</Text>
+              <Text T6 bold>
+                C.C
+              </Text>
             </Title>
             <InputWrapper>
               <TextInput
@@ -786,7 +977,9 @@ function Telemedicine() {
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Subjective{'\n'}Symtoms</Text>
+              <Text T6 bold>
+                Subjective{"\n"}Symtoms
+              </Text>
             </Title>
             <InputWrapper>
               <TextArea
@@ -800,7 +993,9 @@ function Telemedicine() {
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Objective{'\n'}Findings</Text>
+              <Text T6 bold>
+                Objective{"\n"}Findings
+              </Text>
             </Title>
             <InputWrapper>
               <TextArea
@@ -814,7 +1009,9 @@ function Telemedicine() {
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Diagnosis</Text>
+              <Text T6 bold>
+                Diagnosis
+              </Text>
               <Column marginTop={6}>
                 <Row gap={4}>
                   <RadioButton
@@ -840,64 +1037,73 @@ function Telemedicine() {
                 </Row>
               </Column>
             </Title>
-            <InputWrapper style={{position: !isDiagnosisOpend && 'relative'}}>
+            <InputWrapper style={{ position: !isDiagnosisOpend && "relative" }}>
               <TextInput
                 placeholder="진단을 입력 해주세요. (복수일 경우 ,로 구분)"
                 value={diagnosis}
                 onChange={handleTextChange}
               />
 
-              {
-                (!isDiagnosisOpend && isDiagnosisListOpen)
-                && <SearchBoxColumn>
-                  {
-                    diagnosisList?.map((item) => {
-                      return (
-                        <SearchBox key={item._id} onClick={() => {
+              {!isDiagnosisOpend && isDiagnosisListOpen && (
+                <SearchBoxColumn>
+                  {diagnosisList?.map((item) => {
+                    return (
+                      <SearchBox
+                        key={item._id}
+                        onClick={() => {
                           setIsDiagnosisListOpen(false);
 
-                          const searchTerms = diagnosis.split(','); // 쉼표로 분리
-                          const lastSearchTerm = searchTerms[searchTerms.length - 1].trim(); // 마지막 검색어 추출 (공백 제거)
-                          const slicedDiagnosis = diagnosis.slice(0, diagnosis.lastIndexOf(lastSearchTerm)).trim();
+                          const searchTerms = diagnosis.split(","); // 쉼표로 분리
+                          const lastSearchTerm =
+                            searchTerms[searchTerms.length - 1].trim(); // 마지막 검색어 추출 (공백 제거)
+                          const slicedDiagnosis = diagnosis
+                            .slice(0, diagnosis.lastIndexOf(lastSearchTerm))
+                            .trim();
                           const updatedDiagnosis = slicedDiagnosis.slice(0, -1);
 
-                          if(updatedDiagnosis){
-                            setDiagnosis(updatedDiagnosis+', '+item.한글명);
-                          }else{
+                          if (updatedDiagnosis) {
+                            setDiagnosis(updatedDiagnosis + ", " + item.한글명);
+                          } else {
                             setDiagnosis(item.한글명);
                           }
 
-                          if(diagnosisCode){
-                            setDiagnosisCode(diagnosisCode+', '+item.상병기호);
-                          }else{
+                          if (diagnosisCode) {
+                            setDiagnosisCode(
+                              diagnosisCode + ", " + item.상병기호
+                            );
+                          } else {
                             setDiagnosisCode(item.상병기호);
                           }
 
-                          if(diagnosisId){
-                            setDiagnosisId(diagnosisId+', '+item._id);
-                          }else{
+                          if (diagnosisId) {
+                            setDiagnosisId(diagnosisId + ", " + item._id);
+                          } else {
                             setDiagnosisId(item._id);
-                          }                          
-                        }}>
-                          <Text T6>{item.한글명} / {item.영문명}</Text>
-                        </SearchBox>
-                      )
-                    })
-                  }
+                          }
+                        }}
+                      >
+                        <Text T6>
+                          {item.한글명} / {item.영문명}
+                        </Text>
+                      </SearchBox>
+                    );
+                  })}
                 </SearchBoxColumn>
-              }
-              
+              )}
+
               <TextInput
                 readOnly
                 placeholder="질병코드 자동 생성"
                 value={diagnosisCode}
-                style={{marginTop: 4}}
+                style={{ marginTop: 4 }}
               />
             </InputWrapper>
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Assessment</Text>
+              <Text T6 bold>
+                Assessment
+              </Text>
             </Title>
             <InputWrapper>
               <TextArea
@@ -911,7 +1117,9 @@ function Telemedicine() {
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Plan</Text>
+              <Text T6 bold>
+                Plan
+              </Text>
             </Title>
             <InputWrapper>
               <TextArea
@@ -925,7 +1133,9 @@ function Telemedicine() {
           </Section>
           <Section>
             <Title>
-              <Text T6 bold>Medical{'\n'}Opinion</Text>
+              <Text T6 bold>
+                Medical{"\n"}Opinion
+              </Text>
             </Title>
             <InputWrapper>
               <TextArea
@@ -939,7 +1149,9 @@ function Telemedicine() {
           </Section>
         </MDBox>
         <MemoBox>
-          <Text T4 bold>Memo</Text>
+          <Text T4 bold>
+            Memo
+          </Text>
           <MemoArea
             placeholder="MD note 작성 전, 메모장으로 활용해주세요."
             value={memoContext}
@@ -950,45 +1162,84 @@ function Telemedicine() {
         </MemoBox>
 
         <Row gap={10}>
-          <LineButton onClick={()=>{
-            window.ChannelIO('boot', {
-              "pluginKey": "0733ee50-0e8f-49fa-995c-5a56df1ff476",
-              "profile": {
-                "name": `${doctorInfo.name} 의사`,
-                "email": `${doctorInfo.email}`,
-                "mobileNumber": `${doctorInfo.landline}`,
-              },
-              mobileMessengerMode: "iframe",
-              hideChannelButtonOnBoot: true
-            });
-            window.ChannelIO('showMessenger');
-          }}>
-            <Text T6 medium>고객센터 연결</Text>
+          <LineButton
+            onClick={() => {
+              window.ChannelIO("boot", {
+                pluginKey: "0733ee50-0e8f-49fa-995c-5a56df1ff476",
+                profile: {
+                  name: `${doctorInfo.name} 의사`,
+                  email: `${doctorInfo.email}`,
+                  mobileNumber: `${doctorInfo.landline}`,
+                },
+                mobileMessengerMode: "iframe",
+                hideChannelButtonOnBoot: true,
+              });
+              window.ChannelIO("showMessenger");
+            }}
+          >
+            <Text T6 medium>
+              고객센터 연결
+            </Text>
           </LineButton>
-          <LineButton onClick={()=>{
-            stopCapture();
-            window.open(`https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${treatmentData?.doctor?.name}&entry.2037580302=${treatmentData?.patient?.passport?.user_name ?? treatmentData?.patient?.passapp_certification?.name}&entry.727078865_year=${moment(treatmentData?.hospital_treatment_room?.start_time).format('YYYY')}&entry.727078865_month=${moment(treatmentData?.hospital_treatment_room?.start_time).format('MM')}&entry.727078865_day=${moment(treatmentData?.hospital_treatment_room?.start_time).format('DD')}`, '_blank')
-          }}>
-            <Text T6 medium>진료영상 첨부</Text>
+          <LineButton
+            onClick={() => {
+              stopCapture();
+              window.open(
+                `https://docs.google.com/forms/d/e/1FAIpQLSfMe6e50Y62J8vICxzrT7V2SWVUCqicADq7I6YjiuD7ccOHIw/viewform?entry.1210454489=${
+                  treatmentData?.doctor?.name
+                }&entry.2037580302=${
+                  treatmentData?.patient?.passport?.user_name ??
+                  treatmentData?.patient?.passapp_certification?.name
+                }&entry.727078865_year=${moment(
+                  treatmentData?.hospital_treatment_room?.start_time
+                ).format("YYYY")}&entry.727078865_month=${moment(
+                  treatmentData?.hospital_treatment_room?.start_time
+                ).format("MM")}&entry.727078865_day=${moment(
+                  treatmentData?.hospital_treatment_room?.start_time
+                ).format("DD")}`,
+                "_blank"
+              );
+            }}
+          >
+            <Text T6 medium>
+              진료영상 첨부
+            </Text>
           </LineButton>
-          <LineButton onClick={()=>setIsDiagnosisOpend(!isDiagnosisOpend)}>
-            <Text T6 medium>{isDiagnosisOpend?'미리보기 닫기':'소견서 미리보기'}</Text>
+          <LineButton onClick={() => setIsDiagnosisOpend(!isDiagnosisOpend)}>
+            <Text T6 medium>
+              {isDiagnosisOpend ? "미리보기 닫기" : "소견서 미리보기"}
+            </Text>
           </LineButton>
 
-          <Column style={{position: 'relative'}} onMouseEnter={() => setIsFinishButtonHovered(true)} onMouseLeave={() => setIsFinishButtonHovered(false)}>
-            <SaveButtonMenu1 className={isFinishButtonHovered && 'open'} onClick={()=>handleTemporarySave()}>
-              <Text T6 medium color='#FFFFFF'>임시 저장</Text>
+          <Column
+            style={{ position: "relative" }}
+            onMouseEnter={() => setIsFinishButtonHovered(true)}
+            onMouseLeave={() => setIsFinishButtonHovered(false)}
+          >
+            <SaveButtonMenu1
+              className={isFinishButtonHovered && "open"}
+              onClick={() => handleTemporarySave()}
+            >
+              <Text T6 medium color="#FFFFFF">
+                임시 저장
+              </Text>
             </SaveButtonMenu1>
-            
-            <SaveButtonMenu2 className={isFinishButtonHovered && 'open'} onClick={()=>handleTreatmentSubmit()}>
-              <Text T6 medium color='#FFFFFF'>최종 제출</Text>
+
+            <SaveButtonMenu2
+              className={isFinishButtonHovered && "open"}
+              onClick={() => handleTreatmentSubmit()}
+            >
+              <Text T6 medium color="#FFFFFF">
+                최종 제출
+              </Text>
             </SaveButtonMenu2>
 
             <SaveButton>
-              <Text T6 medium color='#FFFFFF'>완료</Text>
+              <Text T6 medium color="#FFFFFF">
+                완료
+              </Text>
             </SaveButton>
           </Column>
-
         </Row>
       </TelemedicineSector2>
     </TelemedicineContainer>
@@ -1004,7 +1255,7 @@ const TelemedicineContainer = styled.div`
   padding-bottom: 30px;
   display: flex;
   gap: 14px;
-`
+`;
 
 const TelemedicineSector1 = styled.div`
   height: 100%;
@@ -1012,17 +1263,17 @@ const TelemedicineSector1 = styled.div`
   flex: 1.7;
   flex-direction: column;
   gap: 14px;
-`
+`;
 
 const TelemedicineSector2 = styled.div`
-height: 100%;
+  height: 100%;
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
   gap: 14px;
-`
+`;
 
 const TelemedicineTitleBox = styled.div`
   width: 100%;
@@ -1031,7 +1282,7 @@ const TelemedicineTitleBox = styled.div`
   background: ${COLOR.SUB3};
   justify-content: space-between;
   align-items: center;
-`
+`;
 
 const Iframe = styled.iframe`
   width: 100%;
@@ -1040,7 +1291,7 @@ const Iframe = styled.iframe`
   border: 1px solid #000000;
   border-radius: 12px;
   background: #030303;
-`
+`;
 
 const InfoBox61 = styled.div`
   width: 100%;
@@ -1049,8 +1300,8 @@ const InfoBox61 = styled.div`
   flex: 6.1;
   padding: 10px 2px 10px 20px;
   border-radius: 12px;
-  background-color: #FFFFFF;
-  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  background-color: #ffffff;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.1);
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
@@ -1062,7 +1313,7 @@ const InfoBox61 = styled.div`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const InfoBox33 = styled.div`
   width: 100%;
@@ -1071,8 +1322,8 @@ const InfoBox33 = styled.div`
   flex: 3.3;
   padding: 10px 2px 10px 20px;
   border-radius: 12px;
-  background-color: #FFFFFF;
-  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  background-color: #ffffff;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.1);
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
@@ -1084,7 +1335,7 @@ const InfoBox33 = styled.div`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const InfoBox10 = styled.div`
   width: 100%;
@@ -1094,9 +1345,9 @@ const InfoBox10 = styled.div`
   align-items: center;
   padding: 10px 25px 10px 20px;
   border-radius: 12px;
-  background-color: #FFFFFF;
-  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
-`
+  background-color: #ffffff;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.1);
+`;
 
 const MDBox = styled.div`
   width: 100%;
@@ -1105,8 +1356,8 @@ const MDBox = styled.div`
   flex-direction: column;
   padding: 10px 20px 20px 20px;
   border-radius: 12px;
-  background-color: #FFFFFF;
-  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  background-color: #ffffff;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.1);
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
@@ -1118,7 +1369,7 @@ const MDBox = styled.div`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const MemoBox = styled.div`
   width: 100%;
@@ -1127,8 +1378,8 @@ const MemoBox = styled.div`
   flex: 1;
   padding: 10px 6px 10px 12px;
   border-radius: 12px;
-  background-color: #FFFFFF;
-  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.10);
+  background-color: #ffffff;
+  box-shadow: 0px 20px 40px 0px rgba(134, 142, 150, 0.1);
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
@@ -1140,20 +1391,20 @@ const MemoBox = styled.div`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const ContentsTitle = styled.div`
   width: 130px;
   height: 34px;
   padding: 5px 0;
-`
+`;
 
 const ContentsText = styled.div`
   margin-left: 20px;
   width: 70%;
   height: auto;
   padding: 5px 0px;
-`
+`;
 
 const Section = styled(Row)`
   width: 100%;
@@ -1169,7 +1420,7 @@ const Title = styled.div`
   align-items: center;
   text-align: center;
   background-color: ${COLOR.GRAY6};
-`
+`;
 
 const InputWrapper = styled.div`
   width: 100%;
@@ -1177,7 +1428,7 @@ const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-`
+`;
 
 const TextInput = styled.input`
   width: 100%;
@@ -1186,7 +1437,7 @@ const TextInput = styled.input`
   border-radius: 5px;
   border: 1px solid ${COLOR.GRAY4};
   font-size: 13px;
-`
+`;
 
 const TextArea = styled.textarea`
   width: 100%;
@@ -1205,7 +1456,7 @@ const TextArea = styled.textarea`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const MemoArea = styled.textarea`
   margin-top: 5px;
@@ -1225,24 +1476,24 @@ const MemoArea = styled.textarea`
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
-`
+`;
 
 const RadioButton = styled.input`
   margin: 0px;
   width: 12px;
-`
+`;
 
 const LineButton = styled.div`
   width: 111px;
   padding: 15px 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 5px;
   border: 1px solid #000000;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor:pointer;
-`
+  cursor: pointer;
+`;
 
 const SaveButton = styled.div`
   width: 111px;
@@ -1254,7 +1505,7 @@ const SaveButton = styled.div`
   align-items: center;
   cursor: pointer;
   z-index: 2;
-`
+`;
 
 const SaveButtonMenu1 = styled.div`
   position: absolute;
@@ -1306,7 +1557,7 @@ const SaveButtonMenu2 = styled.div`
 
 const StyledRow = styled(Row)`
   align-items: flex-start;
-`
+`;
 
 const SearchBoxColumn = styled(Column)`
   position: absolute;
@@ -1314,6 +1565,7 @@ const SearchBoxColumn = styled(Column)`
   left: 10px;
   height: 100px;
   border: 1px solid ${COLOR.GRAY4};
+  background-color: #fff;
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 5px;
@@ -1327,13 +1579,13 @@ const SearchBoxColumn = styled(Column)`
     border: 1px solid #eee;
     border-radius: 5px;
   }
-`
+`;
 
 const SearchBox = styled.div`
   padding: 0 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   cursor: pointer;
   &:hover {
     background-color: ${COLOR.SUB3};
   }
-`
+`;
